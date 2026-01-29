@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 from backend.db import models
 from backend.db.database import get_db
@@ -10,7 +11,7 @@ app = FastAPI()
 #Test health check
 @app.get("/health")
 def health_check(db: Session = Depends(get_db)):
-    result = db.execute("SELECT 1").scalar()
+    result = db.execute(text("SELECT 1")).scalar()
     return {"status": "ok", "db_result": result}
 
 #POST to Users
