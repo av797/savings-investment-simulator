@@ -25,6 +25,8 @@ class User(Base):
     monthly_income = Column(Numeric)
     created_at = Column(DateTime, server_default=func.now())
     is_active = Column(Boolean, default=True)
+    password_hash = Column(String, nullable=False)
+    last_login = Column(DateTime, nullable=True)
 
     accounts = relationship("Account", back_populates="user")
     simulations = relationship("Simulation", back_populates="user")
