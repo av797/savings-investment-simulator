@@ -7,7 +7,8 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
-    Text
+    Text,
+    Boolean
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -23,6 +24,7 @@ class User(Base):
     risk_profile = Column(Text)
     monthly_income = Column(Numeric)
     created_at = Column(DateTime, server_default=func.now())
+    is_active = Column(Boolean, default=True)
 
     accounts = relationship("Account", back_populates="user")
     simulations = relationship("Simulation", back_populates="user")

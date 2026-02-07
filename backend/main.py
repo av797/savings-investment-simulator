@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from datetime import datetime
@@ -46,7 +46,28 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 @app.get("/users/{user_id}", response_model=UserOut)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     #only returning active users for now
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    user = db.query(models.User).filter(
+        models.User.id == user_id,
+        models.User.is_active == True
+        ).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user  
+    return user
+
+#delete users endpoint
+@app.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    # Find the user only if active
+    user = db.query(models.User).filter(
+        models.User.id == user_id,
+        models.User.is_active == True
+    ).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Soft delete
+    user.is_active = False
+    db.commit()
+    # 204 No Content means no body is returned
+    return
