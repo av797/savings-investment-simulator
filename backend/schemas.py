@@ -28,4 +28,18 @@ class UserOut(BaseModel):
     model_config = {
         "from_attributes": True  # Pydantic v2 replacement for orm_mode
     }
-    
+
+
+#for simulations
+class SimulationInput(BaseModel):
+    strategy_name: str
+    starting_balance: float
+    monthly_contribution: float
+    expected_return: float  # annual %
+    years: int
+
+
+class SimulationOutput(BaseModel):
+    final_value: float
+    total_contributions: float
+    interest_earned: float
