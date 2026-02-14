@@ -4,10 +4,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from datetime import datetime
 from passlib.context import CryptContext
+from datetime import timezone
 
 from backend.db import models
 from backend.db.database import get_db
 from backend.schemas import UserCreate, UserOut, UserLogin, SimulationInput, SimulationOutput
+from backend.security import create_access_token
+from backend.dependencies import get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -46,10 +49,15 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     if not verify_password(user.password, db_user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    db_user.last_login = datetime.now()
+    access_token = create_access_token(data={"user_id": db_user.id})
+
+    db_user.last_login = datetime.now(timezone.utc)
     db.commit()
 
-    return {"message": "Login successful", "user_id": db_user.id, "email": db_user.email}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
 
 #POST to Users
 @router.post("/users", status_code=201, response_model=UserOut)
@@ -84,8 +92,11 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 #Get users endpoint
-@router.get("/users/{user_id}", response_model=UserOut)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+@router.get("/me", response_model=UserOut)
+def get_user(
+    user_id: int = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+    ):
     #only returning active users for now
     user = db.query(models.User).filter(
         models.User.id == user_id,
@@ -96,8 +107,8 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     return user
 
 #delete users endpoint
-@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
     # Find the user only if active
     user = db.query(models.User).filter(
         models.User.id == user_id,
