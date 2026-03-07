@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WealthSim</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface2: #1e1e1e;
+      --border: #2a2a2a;
+      --accent: #4f8ef7;
+      --accent-hover: #6fa3ff;
+      --text: #f0f0f0;
+      --muted: #666;
+      --success: #3ecf8e;
+      --danger: #f87171;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── AUTH SCREEN ── */
+    #auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .auth-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .auth-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 28px;
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 9px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      color: var(--muted);
+      transition: all 0.2s;
+      border: none;
+      background: none;
+    }
+
+    .auth-tab.active {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      padding: 11px 14px;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus { border-color: var(--accent); }
+    .field input::placeholder { color: #444; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error-msg {
+      font-size: 0.8rem;
+      color: var(--danger);
+      margin-top: 12px;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    /* ── DASHBOARD ── */
+    #dashboard-screen {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-user {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .nav-user span {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* Dashboard body */
+    .dash-body {
+      padding: 40px 32px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .dash-greeting {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .dash-greeting span { color: var(--accent); }
+
+    .dash-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+
+    /* Profile cards row */
+    .profile-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .info-card .ic-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .info-card .ic-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Simulation section */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .sim-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .sim-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .sim-form .field { margin-bottom: 0; }
+
+    .btn-run {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-run:hover { background: var(--accent-hover); }
+    .btn-run:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Results */
+    .results-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+      display: none;
+    }
+
+    .result-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .result-card .rc-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .result-card .rc-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .rc-final { color: var(--success); }
+    .rc-contrib { color: var(--accent); }
+    .rc-interest { color: #f4c55a; }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.25s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.ok { background: #1a3a2a; color: var(--success); border: 1px solid #2a5a3a; }
+    #toast.err { background: #3a1a1a; color: var(--danger); border: 1px solid #5a2a2a; }
+  </style>
+</head>
+<body>
+
+<!-- ── AUTH SCREEN ── -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">WealthSim</div>
+    <div class="auth-subtitle">Your personal investment simulator</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <div class="field">
+        <label>Email</label>
+        <input id="login-email" type="email" placeholder="you@example.com"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="login-password" type="password" placeholder="••••••••"
+               onkeydown="if(event.key==='Enter') doLogin()"/>
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()" id="login-btn">Login</button>
+      <div class="error-msg" id="login-error"></div>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" style="display:none">
+      <div class="field">
+        <label>Email</label>
+        <input id="reg-email" type="email" placeholder="you@example.com"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="reg-password" type="password" placeholder="••••••••"/>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Age</label>
+          <input id="reg-age" type="number" placeholder="30"/>
+        </div>
+        <div class="field">
+          <label>Monthly Income (£)</label>
+          <input id="reg-income" type="number" placeholder="5000"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Risk Profile</label>
+        <input id="reg-risk" type="text" placeholder="low / medium / high"/>
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()" id="register-btn">Create Account</button>
+      <div class="error-msg" id="register-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard-screen">
+  <nav class="navbar">
+    <div class="nav-logo">WealthSim</div>
+    <div class="nav-right">
+      <div class="nav-user">Logged in as <span id="nav-email">—</span></div>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+      <button class="btn-logout" onclick="doDeleteMe()" style="border-color: #f87171; color: #f87171;">Delete Account</button>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <div class="dash-greeting">Welcome back, <span id="greeting-name">—</span> 👋</div>
+    <div class="dash-sub">Here's your account overview and simulation tools.</div>
+
+    <!-- Profile info -->
+    <div class="profile-row">
+      <div class="info-card">
+        <div class="ic-label">Monthly Income</div>
+        <div class="ic-value" id="profile-income">—</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">Risk Profile</div>
+        <div class="ic-value" id="profile-risk">—</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">Age</div>
+        <div class="ic-value" id="profile-age">—</div>
+      </div>
+    </div>
+
+    <!-- Simulation -->
+    <div class="section-title">Run a Simulation</div>
+    <div class="sim-card">
+      <div class="sim-form">
+        <div class="field">
+          <label>Starting Balance (£)</label>
+          <input id="sim-start" type="number" placeholder="10000"/>
+        </div>
+        <div class="field">
+          <label>Monthly Contribution (£)</label>
+          <input id="sim-monthly" type="number" placeholder="500"/>
+        </div>
+        <div class="field">
+          <label>Expected Annual Return</label>
+          <input id="sim-return" type="number" step="0.01" placeholder="0.07"/>
+        </div>
+        <div class="field">
+          <label>Years</label>
+          <input id="sim-years" type="number" placeholder="30"/>
+        </div>
+      </div>
+      <button class="btn-run" onclick="doSimulate()" id="sim-btn">Run Simulation →</button>
+
+      <!-- Results -->
+      <div class="results-row" id="results-row">
+        <div class="result-card">
+          <div class="rc-label">Final Value</div>
+          <div class="rc-value rc-final" id="res-final">—</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-label">Total Contributions</div>
+          <div class="rc-value rc-contrib" id="res-contrib">—</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-label">Interest Earned</div>
+          <div class="rc-value rc-interest" id="res-interest">—</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const BASE = 'http://localhost:8000';
+  let token = null;
+
+  // ── Tab switch ──
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+    });
+    document.getElementById('login-form').style.display    = tab === 'login'    ? 'block' : 'none';
+    document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  }
+
+  // ── Toast ──
+  function toast(msg, type = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `show ${type}`;
+    setTimeout(() => el.className = '', 3000);
+  }
+
+  function fmt(n) {
+    return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  // ── Register ──
+  async function doRegister() {
+    const btn = document.getElementById('register-btn');
+    const err = document.getElementById('register-error');
+    err.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+
+    try {
+      const res = await fetch(`${BASE}/users/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('reg-email').value,
+          password: document.getElementById('reg-password').value,
+          age: parseInt(document.getElementById('reg-age').value),
+          risk_profile: document.getElementById('reg-risk').value,
+          monthly_income: parseFloat(document.getElementById('reg-income').value),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast('Account created! Please log in.', 'ok');
+        switchTab('login');
+        document.getElementById('login-email').value = document.getElementById('reg-email').value;
+      } else {
+        err.textContent = data.detail || 'Registration failed.';
+      }
+    } catch (e) {
+      err.textContent = 'Could not reach server. Is the backend running?';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+
+  // ── Login ──
+  async function doLogin() {
+    const btn = document.getElementById('login-btn');
+    const err = document.getElementById('login-error');
+    err.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Logging in...';
+
+    try {
+      const res = await fetch(`${BASE}/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('login-email').value,
+          password: document.getElementById('login-password').value,
+        }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.access_token) {
+        token = data.access_token;
+        await loadDashboard();
+      } else {
+        err.textContent = data.detail || 'Invalid email or password.';
+      }
+    } catch (e) {
+      err.textContent = 'Could not reach server. Is the backend running?';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Login';
+  }
+
+  // ── Load dashboard ──
+  async function loadDashboard() {
+    try {
+      const res = await fetch(`${BASE}/users/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const user = await res.json();
+
+      document.getElementById('nav-email').textContent      = user.email;
+      document.getElementById('greeting-name').textContent  = user.email.split('@')[0];
+      document.getElementById('profile-income').textContent = fmt(user.monthly_income);
+      document.getElementById('profile-risk').textContent   = user.risk_profile.charAt(0).toUpperCase() + user.risk_profile.slice(1);
+      document.getElementById('profile-age').textContent    = user.age + ' yrs';
+
+      document.getElementById('auth-screen').style.display      = 'none';
+      document.getElementById('dashboard-screen').style.display = 'flex';
+      toast('Welcome back!', 'ok');
+    } catch (e) {
+      document.getElementById('login-error').textContent = 'Login succeeded but could not load profile.';
+    }
+  }
+
+  // ── Logout ──
+  function doLogout() {
+    token = null;
+    document.getElementById('dashboard-screen').style.display = 'none';
+    document.getElementById('auth-screen').style.display      = 'flex';
+    document.getElementById('results-row').style.display      = 'none';
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+    toast('Logged out', 'ok');
+  }
+
+  // ── Simulate ──
+  async function doSimulate() {
+    const btn = document.getElementById('sim-btn');
+    btn.disabled = true;
+    btn.textContent = 'Running...';
+
+    try {
+      const res = await fetch(`${BASE}/simulate/simulate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          starting_balance:     parseFloat(document.getElementById('sim-start').value),
+          monthly_contribution: parseFloat(document.getElementById('sim-monthly').value),
+          expected_return:      parseFloat(document.getElementById('sim-return').value),
+          years:                parseInt(document.getElementById('sim-years').value),
+        }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        document.getElementById('res-final').textContent   = fmt(data.final_value);
+        document.getElementById('res-contrib').textContent = fmt(data.total_contributions);
+        document.getElementById('res-interest').textContent = fmt(data.interest_earned);
+        document.getElementById('results-row').style.display = 'grid';
+        toast('Simulation complete!', 'ok');
+      } else {
+        toast(data.detail || 'Simulation failed', 'err');
+      }
+    } catch (e) {
+      toast('Could not reach server', 'err');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Run Simulation →';
+  }
+
+  async function doDeleteMe() {
+    if (!confirm('Are you sure? This will delete your account.')) return;
+        try {
+            const res = await fetch(`${BASE}/users/me`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (res.ok) {
+            toast('Account deleted!', 'ok');
+            doLogout();
+            } else {
+            const data = await res.json();
+            toast(data.detail || 'Delete failed', 'err');
+            }
+        } catch (e) {
+            toast('Could not reach server', 'err');
+        }
+    }
+</script>
+</body>
+</html>

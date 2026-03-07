@@ -32,7 +32,7 @@ class UserOut(BaseModel):
 
 #for simulations
 class SimulationInput(BaseModel):
-    strategy_name: str
+    strategy_name: Optional[str] = None
     starting_balance: float
     monthly_contribution: float
     expected_return: float  # annual %

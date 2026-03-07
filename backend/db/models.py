@@ -19,7 +19,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(Text)
+    email = Column(String(255), unique=True, index=True, nullable=False)
     age = Column(Integer)
     risk_profile = Column(Text)
     monthly_income = Column(Numeric)
