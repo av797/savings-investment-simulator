@@ -3,6 +3,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
+from typing import List
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -43,3 +44,41 @@ class SimulationOutput(BaseModel):
     final_value: float
     total_contributions: float
     interest_earned: float
+
+class SimulationSave(BaseModel):
+    strategy_name: str
+    starting_balance: float
+    monthly_contribution: float
+    expected_return: float
+    years: int
+
+
+# Single year in a forecast breakdown
+class YearlyBreakdown(BaseModel):
+    year: int
+    balance: float
+    total_contributions: float
+    interest_earned: float
+
+
+# What we return when fetching a saved simulation
+class SimulationOut(BaseModel):
+    id: int
+    strategy_name: str
+    starting_balance: float
+    monthly_contribution: float
+    expected_return: float
+    final_value: float
+    created_at: datetime
+
+    model_config = {
+        "from_attributes": True
+    }
+
+
+# Extended simulation output with yearly breakdown
+class SimulationOutputExtended(BaseModel):
+    final_value: float
+    total_contributions: float
+    interest_earned: float
+    yearly_breakdown: List[YearlyBreakdown]
