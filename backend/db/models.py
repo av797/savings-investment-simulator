@@ -67,6 +67,8 @@ class Simulation(Base):
     starting_balance = Column(Numeric)
     monthly_contribution = Column(Numeric)
     expected_return = Column(Numeric)
+    years = Column(Integer)
+    inflation_rate = Column(Numeric, default=0.0)
     final_value = Column(Numeric)
     created_at = Column(DateTime, server_default=func.now())
 

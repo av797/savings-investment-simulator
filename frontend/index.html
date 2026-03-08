@@ -14,6 +14,8 @@
       --danger: #f87171; --warning: #f4c55a;
     }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* AUTH */
     #auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
     .auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; }
     .auth-logo { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
@@ -21,6 +23,8 @@
     .auth-tabs { display: flex; background: var(--bg); border-radius: 8px; padding: 4px; margin-bottom: 28px; }
     .auth-tab { flex: 1; padding: 9px; text-align: center; font-size: 0.85rem; font-weight: 500; cursor: pointer; border-radius: 6px; color: var(--muted); transition: all 0.2s; border: none; background: none; font-family: 'Inter', sans-serif; }
     .auth-tab.active { background: var(--surface2); color: var(--text); }
+
+    /* FIELDS & BUTTONS */
     .field { margin-bottom: 16px; }
     .field label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
     .field input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; padding: 11px 14px; border-radius: 8px; outline: none; transition: border-color 0.2s; }
@@ -32,15 +36,41 @@
     .btn-primary:hover { background: var(--accent-hover); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
     .error-msg { font-size: 0.8rem; color: var(--danger); margin-top: 12px; text-align: center; min-height: 18px; }
+
+    /* PASSWORD TOGGLE */
+    .password-wrap { position: relative; }
+    .password-wrap input { padding-right: 42px; }
+    .pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
+    .pw-toggle:hover { color: var(--text); }
+
+    /* DASHBOARD */
     #dashboard-screen { display: none; min-height: 100vh; flex-direction: column; }
     .navbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
     .nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
-    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-right { display: flex; align-items: center; gap: 12px; position: relative; }
     .nav-user { font-size: 0.82rem; color: var(--muted); }
     .nav-user span { color: var(--text); font-weight: 500; }
     .btn-sm { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'Inter', sans-serif; font-size: 0.8rem; padding: 7px 14px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
     .btn-sm:hover { border-color: var(--text); color: var(--text); }
     .btn-sm.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* USER MENU DROPDOWN */
+    .user-menu-wrap { position: relative; }
+    .user-avatar-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; padding: 7px 14px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+    .user-avatar-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .user-avatar-btn svg { transition: transform 0.2s; }
+    .user-avatar-btn.open svg { transform: rotate(180deg); }
+    .user-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; min-width: 200px; padding: 6px; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+    .user-dropdown.open { display: block; }
+    .dropdown-header { padding: 10px 12px 8px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+    .dropdown-header .dh-name { font-size: 0.88rem; font-weight: 600; }
+    .dropdown-header .dh-email { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .dropdown-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px; border-radius: 6px; border: none; background: none; font-family: 'Inter', sans-serif; font-size: 0.83rem; color: var(--muted); cursor: pointer; transition: all 0.2s; text-align: left; }
+    .dropdown-item:hover { background: var(--surface2); color: var(--text); }
+    .dropdown-item.danger { color: var(--danger); }
+    .dropdown-item.danger:hover { background: rgba(248,113,113,0.08); color: var(--danger); }
+    .dropdown-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
     .tab-nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; }
     .tab-btn { padding: 14px 20px; font-size: 0.85rem; font-weight: 500; color: var(--muted); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; border-bottom: 2px solid transparent; transition: all 0.2s; margin-bottom: -1px; }
     .tab-btn:hover { color: var(--text); }
@@ -51,11 +81,15 @@
     .dash-greeting { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
     .dash-greeting span { color: var(--accent); }
     .dash-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 36px; }
+    .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 20px; }
+
+    /* OVERVIEW */
     .profile-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 36px; }
     .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
     .info-card .ic-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
     .info-card .ic-value { font-size: 1.2rem; font-weight: 600; }
-    .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 20px; }
+
+    /* SIMULATOR */
     .sim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
     .sim-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
     .sim-form .field { margin-bottom: 0; }
@@ -80,17 +114,24 @@
     .breakdown-table td { padding: 10px 12px; border-bottom: 1px solid #1a1a1a; color: var(--text); }
     .breakdown-table tr:last-child td { border-bottom: none; }
     .breakdown-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* SAVED SIMULATIONS */
     .saved-list { display: flex; flex-direction: column; gap: 14px; }
-    .saved-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .saved-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; transition: border-color 0.2s; }
+    .saved-card:hover { border-color: #3a3a3a; }
     .saved-card .sc-left { flex: 1; }
     .saved-card .sc-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
     .saved-card .sc-meta { font-size: 0.78rem; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
-    .saved-card .sc-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+    .saved-card .sc-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
     .saved-card .sc-value { font-size: 1.1rem; font-weight: 700; color: var(--success); }
+    .btn-load { background: transparent; border: 1px solid var(--accent); color: var(--accent); font-family: 'Inter', sans-serif; font-size: 0.78rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .btn-load:hover { background: rgba(79,142,247,0.08); }
     .btn-delete { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'Inter', sans-serif; font-size: 0.78rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
     .btn-delete:hover { border-color: var(--danger); color: var(--danger); }
     .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.88rem; }
     .empty-state .es-icon { font-size: 2rem; margin-bottom: 12px; }
+
+    /* MODALS */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 100; display: none; }
     .modal-overlay.visible { display: flex; }
     .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 32px; width: 100%; max-width: 400px; }
@@ -100,6 +141,8 @@
     .modal-actions .btn { margin-top: 0; flex: 1; }
     .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'Inter', sans-serif; }
     .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+
+    /* TOAST */
     #toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; opacity: 0; transform: translateY(8px); transition: all 0.25s; pointer-events: none; z-index: 999; }
     #toast.show { opacity: 1; transform: translateY(0); }
     #toast.ok { background: #1a3a2a; color: var(--success); border: 1px solid #2a5a3a; }
@@ -107,6 +150,8 @@
   </style>
 </head>
 <body>
+
+<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">WealthSim</div>
@@ -117,13 +162,29 @@
     </div>
     <div id="login-form">
       <div class="field"><label>Email</label><input id="login-email" type="email" placeholder="you@example.com"/></div>
-      <div class="field"><label>Password</label><input id="login-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()"/></div>
+      <div class="field">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input id="login-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('login-password', this)" tabindex="-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
       <button class="btn btn-primary" onclick="doLogin()" id="login-btn">Login</button>
       <div class="error-msg" id="login-error"></div>
     </div>
     <div id="register-form" style="display:none">
       <div class="field"><label>Email</label><input id="reg-email" type="email" placeholder="you@example.com"/></div>
-      <div class="field"><label>Password</label><input id="reg-password" type="password" placeholder="••••••••"/></div>
+      <div class="field">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input id="reg-password" type="password" placeholder="••••••••"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('reg-password', this)" tabindex="-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
       <div class="form-row">
         <div class="field"><label>Age</label><input id="reg-age" type="number" placeholder="30"/></div>
         <div class="field"><label>Monthly Income (£)</label><input id="reg-income" type="number" placeholder="5000"/></div>
@@ -135,20 +196,45 @@
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div id="dashboard-screen">
   <nav class="navbar">
     <div class="nav-logo">WealthSim</div>
     <div class="nav-right">
-      <div class="nav-user">Hi, <span id="nav-email">—</span></div>
-      <button class="btn-sm danger" onclick="doLogout()">Logout</button>
+      <!-- User menu dropdown -->
+      <div class="user-menu-wrap">
+        <button class="user-avatar-btn" id="user-menu-btn" onclick="toggleUserMenu()">
+          <span id="nav-email">—</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="dropdown-header">
+            <div class="dh-name" id="dropdown-name">—</div>
+            <div class="dh-email" id="dropdown-email">—</div>
+          </div>
+          <button class="dropdown-item" onclick="doLogout()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item danger" onclick="doDeleteMe()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Delete Account
+          </button>
+        </div>
+      </div>
     </div>
   </nav>
+
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchDashTab('overview', this)">Overview</button>
     <button class="tab-btn" onclick="switchDashTab('simulator', this)">Simulator</button>
     <button class="tab-btn" onclick="switchDashTab('saved', this)">Saved Simulations</button>
   </div>
+
   <div class="dash-body">
+
+    <!-- Overview -->
     <div class="tab-panel active" id="tab-overview">
       <div class="dash-greeting">Welcome back, <span id="greeting-name">—</span> 👋</div>
       <div class="dash-sub">Here's your account overview.</div>
@@ -158,6 +244,8 @@
         <div class="info-card"><div class="ic-label">Age</div><div class="ic-value" id="profile-age">—</div></div>
       </div>
     </div>
+
+    <!-- Simulator -->
     <div class="tab-panel" id="tab-simulator">
       <div class="section-title">Run a Savings Simulation</div>
       <div class="sim-card">
@@ -166,6 +254,7 @@
           <div class="field"><label>Monthly Contribution (£)</label><input id="sim-monthly" type="number" placeholder="500"/></div>
           <div class="field"><label>Expected Annual Return (e.g. 0.07 = 7%)</label><input id="sim-return" type="number" step="0.01" placeholder="0.07"/></div>
           <div class="field"><label>Years</label><input id="sim-years" type="number" placeholder="30"/></div>
+          <div class="field"><label>Inflation Rate (e.g. 0.02 = 2%, optional)</label><input id="sim-inflation" type="number" step="0.01" placeholder="0.02"/></div>
         </div>
         <div class="btn-row">
           <button class="btn-run" onclick="doSimulate()" id="sim-btn">Run Simulation →</button>
@@ -173,35 +262,51 @@
         </div>
         <div class="results-row" id="results-row">
           <div class="result-card"><div class="rc-label">Final Value</div><div class="rc-value rc-final" id="res-final">—</div></div>
-          <div class="result-card"><div class="rc-label">Total Contributions</div><div class="rc-value rc-contrib" id="res-contrib">—</div></div>
+          <div class="result-card"><div class="rc-label">Real Value (inflation-adj.)</div><div class="rc-value rc-contrib" id="res-real">—</div></div>
           <div class="result-card"><div class="rc-label">Interest Earned</div><div class="rc-value rc-interest" id="res-interest">—</div></div>
         </div>
         <div class="breakdown-section" id="breakdown-section">
           <div class="breakdown-title">Year by Year Breakdown</div>
           <table class="breakdown-table">
-            <thead><tr><th>Year</th><th>Balance</th><th>Total Contributed</th><th>Interest Earned</th></tr></thead>
+            <thead><tr><th>Year</th><th>Balance</th><th>Real Balance</th><th>Total Contributed</th><th>Interest Earned</th></tr></thead>
             <tbody id="breakdown-body"></tbody>
           </table>
         </div>
       </div>
     </div>
+
+    <!-- Saved Simulations -->
     <div class="tab-panel" id="tab-saved">
       <div class="section-title">Saved Simulations</div>
       <div class="saved-list" id="saved-list">
         <div class="empty-state"><div class="es-icon">📊</div>Loading...</div>
       </div>
     </div>
+
   </div>
 </div>
 
+<!-- Save modal -->
 <div class="modal-overlay" id="save-modal">
   <div class="modal">
     <div class="modal-title">Save Simulation</div>
     <div class="modal-sub">Give this simulation a name so you can find it later.</div>
-    <div class="field"><label>Simulation Name</label><input id="simulation-name" type="text" placeholder="e.g. Retirement Plan, House Deposit..."/></div>
+    <div class="field"><label>Simulation Name</label><input id="strategy-name" type="text" placeholder="e.g. Retirement Plan, House Deposit..."/></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeSaveModal()">Cancel</button>
       <button class="btn btn-primary" onclick="doSave()" id="confirm-save-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete account confirm modal -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <div class="modal-title">Delete Account</div>
+    <div class="modal-sub">This is permanent and cannot be undone. All your simulations will be lost.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-primary" style="background:var(--danger);" onclick="confirmDeleteMe()" id="confirm-delete-btn">Yes, Delete</button>
     </div>
   </div>
 </div>
@@ -212,7 +317,36 @@
   const BASE = 'http://localhost:8000';
   let token = null;
   let lastSimData = null;
+  let currentUser = null;
 
+  // ── Password toggle ──
+  function togglePw(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    btn.innerHTML = isHidden
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  }
+
+  // ── User menu dropdown ──
+  function toggleUserMenu() {
+    const btn = document.getElementById('user-menu-btn');
+    const dropdown = document.getElementById('user-dropdown');
+    btn.classList.toggle('open');
+    dropdown.classList.toggle('open');
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', e => {
+    const wrap = document.querySelector('.user-menu-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('user-menu-btn').classList.remove('open');
+      document.getElementById('user-dropdown').classList.remove('open');
+    }
+  });
+
+  // ── Auth tabs ──
   function switchTab(tab) {
     document.querySelectorAll('.auth-tab').forEach((t, i) => {
       t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
@@ -221,6 +355,7 @@
     document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
   }
 
+  // ── Dashboard tabs ──
   function switchDashTab(tab, el) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -229,6 +364,7 @@
     if (tab === 'saved') loadSaved();
   }
 
+  // ── Toast ──
   function toast(msg, type = 'ok') {
     const el = document.getElementById('toast');
     el.textContent = msg;
@@ -244,6 +380,7 @@
     return new Date(str).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
+  // ── Register ──
   async function doRegister() {
     const btn = document.getElementById('register-btn');
     const err = document.getElementById('register-error');
@@ -260,12 +397,16 @@
         }),
       });
       const data = await res.json();
-      if (res.ok) { toast('Account created! Please log in.', 'ok'); switchTab('login'); document.getElementById('login-email').value = document.getElementById('reg-email').value; }
-      else err.textContent = data.detail || 'Registration failed.';
+      if (res.ok) {
+        toast('Account created! Please log in.', 'ok');
+        switchTab('login');
+        document.getElementById('login-email').value = document.getElementById('reg-email').value;
+      } else err.textContent = data.detail || 'Registration failed.';
     } catch (e) { err.textContent = 'Could not reach server.'; }
     btn.disabled = false; btn.textContent = 'Create Account';
   }
 
+  // ── Login ──
   async function doLogin() {
     const btn = document.getElementById('login-btn');
     const err = document.getElementById('login-error');
@@ -273,7 +414,10 @@
     try {
       const res = await fetch(`${BASE}/users/login`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: document.getElementById('login-email').value, password: document.getElementById('login-password').value }),
+        body: JSON.stringify({
+          email: document.getElementById('login-email').value,
+          password: document.getElementById('login-password').value,
+        }),
       });
       const data = await res.json();
       if (res.ok && data.access_token) { token = data.access_token; await loadDashboard(); }
@@ -282,23 +426,31 @@
     btn.disabled = false; btn.textContent = 'Login';
   }
 
+  // ── Load dashboard ──
   async function loadDashboard() {
     try {
       const res = await fetch(`${BASE}/users/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-      const user = await res.json();
-      document.getElementById('nav-email').textContent     = user.email.split('@')[0];
-      document.getElementById('greeting-name').textContent = user.email.split('@')[0];
-      document.getElementById('profile-income').textContent = fmt(user.monthly_income);
-      document.getElementById('profile-risk').textContent  = user.risk_profile ? user.risk_profile.charAt(0).toUpperCase() + user.risk_profile.slice(1) : '—';
-      document.getElementById('profile-age').textContent   = user.age + ' yrs';
+      currentUser = await res.json();
+      const name = currentUser.email.split('@')[0];
+      document.getElementById('nav-email').textContent      = name;
+      document.getElementById('dropdown-name').textContent  = name;
+      document.getElementById('dropdown-email').textContent = currentUser.email;
+      document.getElementById('greeting-name').textContent  = name;
+      document.getElementById('profile-income').textContent = fmt(currentUser.monthly_income);
+      document.getElementById('profile-risk').textContent   = currentUser.risk_profile
+        ? currentUser.risk_profile.charAt(0).toUpperCase() + currentUser.risk_profile.slice(1) : '—';
+      document.getElementById('profile-age').textContent    = currentUser.age + ' yrs';
       document.getElementById('auth-screen').style.display      = 'none';
       document.getElementById('dashboard-screen').style.display = 'flex';
       toast('Welcome back!', 'ok');
-    } catch (e) { document.getElementById('login-error').textContent = 'Login succeeded but could not load profile.'; }
+    } catch (e) {
+      document.getElementById('login-error').textContent = 'Login succeeded but could not load profile.';
+    }
   }
 
+  // ── Logout ──
   function doLogout() {
-    token = null; lastSimData = null;
+    token = null; lastSimData = null; currentUser = null;
     document.getElementById('dashboard-screen').style.display = 'none';
     document.getElementById('auth-screen').style.display      = 'flex';
     document.getElementById('results-row').classList.remove('visible');
@@ -306,48 +458,67 @@
     document.getElementById('save-btn').classList.remove('visible');
     document.getElementById('login-email').value = '';
     document.getElementById('login-password').value = '';
+    document.getElementById('user-dropdown').classList.remove('open');
+    document.getElementById('user-menu-btn').classList.remove('open');
     toast('Logged out', 'ok');
   }
 
+  // ── Simulate ──
   async function doSimulate() {
     const btn = document.getElementById('sim-btn');
     btn.disabled = true; btn.textContent = 'Running...';
+    const inflationVal = parseFloat(document.getElementById('sim-inflation').value);
     const simData = {
       starting_balance:     parseFloat(document.getElementById('sim-start').value),
       monthly_contribution: parseFloat(document.getElementById('sim-monthly').value),
       expected_return:      parseFloat(document.getElementById('sim-return').value),
       years:                parseInt(document.getElementById('sim-years').value),
+      inflation_rate:       isNaN(inflationVal) ? 0.0 : inflationVal,
     };
     try {
       const res = await fetch(`${BASE}/simulate/simulate`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(simData),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(simData),
       });
       const data = await res.json();
       if (res.ok) {
         lastSimData = simData;
         document.getElementById('res-final').textContent    = fmt(data.final_value);
-        document.getElementById('res-contrib').textContent  = fmt(data.total_contributions);
+        document.getElementById('res-real').textContent     = fmt(data.real_final_value);
         document.getElementById('res-interest').textContent = fmt(data.interest_earned);
         document.getElementById('results-row').classList.add('visible');
         const tbody = document.getElementById('breakdown-body');
         tbody.innerHTML = '';
         data.yearly_breakdown.forEach(row => {
-          tbody.innerHTML += `<tr><td>Year ${row.year}</td><td>${fmt(row.balance)}</td><td>${fmt(row.total_contributions)}</td><td>${fmt(row.interest_earned)}</td></tr>`;
+          tbody.innerHTML += `<tr>
+            <td>Year ${row.year}</td>
+            <td>${fmt(row.balance)}</td>
+            <td>${fmt(row.real_balance)}</td>
+            <td>${fmt(row.total_contributions)}</td>
+            <td>${fmt(row.interest_earned)}</td>
+          </tr>`;
         });
         document.getElementById('breakdown-section').classList.add('visible');
-        if (token) document.getElementById('save-btn').classList.add('visible');
+        document.getElementById('save-btn').classList.add('visible');
         toast('Simulation complete!', 'ok');
-      } else { toast(data.detail || 'Simulation failed', 'err'); }
+      } else toast(data.detail || 'Simulation failed', 'err');
     } catch (e) { toast('Could not reach server', 'err'); }
     btn.disabled = false; btn.textContent = 'Run Simulation →';
   }
 
-  function openSaveModal() { document.getElementById('simulation-name').value = ''; document.getElementById('save-modal').classList.add('visible'); setTimeout(() => document.getElementById('simulation-name').focus(), 100); }
+  // ── Save modal ──
+  function openSaveModal() {
+    document.getElementById('strategy-name').value = '';
+    document.getElementById('save-modal').classList.add('visible');
+    setTimeout(() => document.getElementById('strategy-name').focus(), 100);
+  }
   function closeSaveModal() { document.getElementById('save-modal').classList.remove('visible'); }
 
+  // ── Save simulation ──
   async function doSave() {
     if (!token) { toast('Please login first', 'err'); return; }
-    const name = document.getElementById('simulation-name').value.trim();
+    const name = document.getElementById('strategy-name').value.trim();
     if (!name) { toast('Please enter a name', 'err'); return; }
     const btn = document.getElementById('confirm-save-btn');
     btn.disabled = true; btn.textContent = 'Saving...';
@@ -364,6 +535,7 @@
     btn.disabled = false; btn.textContent = 'Save';
   }
 
+  // ── Load saved simulations ──
   async function loadSaved() {
     if (!token) return;
     const list = document.getElementById('saved-list');
@@ -383,17 +555,40 @@
               <span>Start: ${fmt(sim.starting_balance)}</span>
               <span>Monthly: ${fmt(sim.monthly_contribution)}</span>
               <span>Return: ${(sim.expected_return * 100).toFixed(1)}%</span>
+              <span>Years: ${sim.years}</span>
               <span>Saved: ${fmtDate(sim.created_at)}</span>
             </div>
           </div>
           <div class="sc-right">
             <div class="sc-value">${fmt(sim.final_value)}</div>
+            <button class="btn-load" onclick="loadSimulation(${sim.id})">Load</button>
             <button class="btn-delete" onclick="deleteSim(${sim.id})">Delete</button>
           </div>
         </div>`).join('');
     } catch (e) { list.innerHTML = '<div class="empty-state">Failed to load simulations.</div>'; }
   }
 
+  // ── Load simulation into form ──
+  async function loadSimulation(id) {
+    try {
+      const res = await fetch(`${BASE}/simulate/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      const sim = data.find(s => s.id === id);
+      if (!sim) { toast('Simulation not found', 'err'); return; }
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn')[1].classList.add('active');
+      document.getElementById('tab-simulator').classList.add('active');
+      document.getElementById('sim-start').value     = sim.starting_balance;
+      document.getElementById('sim-monthly').value   = sim.monthly_contribution;
+      document.getElementById('sim-return').value    = sim.expected_return;
+      document.getElementById('sim-years').value     = sim.years;
+      document.getElementById('sim-inflation').value = sim.inflation_rate || '';
+      toast(`Loaded "${sim.strategy_name}" — click Run to simulate`, 'ok');
+    } catch (e) { toast('Could not load simulation', 'err'); }
+  }
+
+  // ── Delete simulation ──
   async function deleteSim(id) {
     if (!confirm('Delete this simulation?')) return;
     try {
@@ -401,11 +596,33 @@
       if (res.ok) {
         document.getElementById(`sim-card-${id}`)?.remove();
         toast('Simulation deleted', 'ok');
-        if (!document.getElementById('saved-list').children.length) {
+        if (!document.getElementById('saved-list').querySelector('.saved-card')) {
           document.getElementById('saved-list').innerHTML = '<div class="empty-state"><div class="es-icon">📊</div>No saved simulations yet.</div>';
         }
       } else toast('Delete failed', 'err');
     } catch (e) { toast('Could not reach server', 'err'); }
+  }
+
+  // ── Delete account ──
+  function doDeleteMe() {
+    document.getElementById('user-dropdown').classList.remove('open');
+    document.getElementById('user-menu-btn').classList.remove('open');
+    document.getElementById('delete-modal').classList.add('visible');
+  }
+  function closeDeleteModal() { document.getElementById('delete-modal').classList.remove('visible'); }
+
+  async function confirmDeleteMe() {
+    const btn = document.getElementById('confirm-delete-btn');
+    btn.disabled = true; btn.textContent = 'Deleting...';
+    try {
+      const res = await fetch(`${BASE}/users/me`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (res.ok) { closeDeleteModal(); toast('Account deleted', 'ok'); doLogout(); }
+      else { const data = await res.json(); toast(data.detail || 'Delete failed', 'err'); }
+    } catch (e) { toast('Could not reach server', 'err'); }
+    btn.disabled = false; btn.textContent = 'Yes, Delete';
   }
 </script>
 </body>

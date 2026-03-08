@@ -4,15 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-app.include_router(users.router)
-app.include_router(simulations.router)
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten this later
-    allow_methods=["*"],
+    allow_origins=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+app.include_router(users.router)
+app.include_router(simulations.router)
 
 @app.get("/health")
 def health_check():

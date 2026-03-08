@@ -1,9 +1,9 @@
-#Here to validate inputs to POST & PATCH
-
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
-from typing import List
+
+
+# ── Users ──
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -12,38 +12,33 @@ class UserCreate(BaseModel):
     risk_profile: Optional[str] = None
     monthly_income: Optional[float] = None
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
-
-#defines what api returns to the user
-class UserOut(BaseModel):
-    id: int  # DB-generated primary key
-    email: EmailStr  # user email
-    age: Optional[int] = None  # optional age
-    risk_profile: Optional[str] = None  # optional risk profile
-    monthly_income: Optional[float] = None  # optional income
-    created_at: Optional[datetime] = None  # timestamp when user was created
-    is_active: bool  # soft-delete flag (1 = active, 0 = deleted)
     
-    model_config = {
-        "from_attributes": True  # Pydantic v2 replacement for orm_mode
-    }
+
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    age: Optional[int] = None
+    risk_profile: Optional[str] = None
+    monthly_income: Optional[float] = None
+    created_at: Optional[datetime] = None
+    is_active: bool
+
+    model_config = {"from_attributes": True}
 
 
-#for simulations
+# ── Simulations ──
+
 class SimulationInput(BaseModel):
-    strategy_name: Optional[str] = None
     starting_balance: float
     monthly_contribution: float
-    expected_return: float  # annual %
+    expected_return: float          # decimal e.g. 0.07 = 7%
     years: int
+    inflation_rate: Optional[float] = 0.0  # decimal e.g. 0.02 = 2%
 
-
-class SimulationOutput(BaseModel):
-    final_value: float
-    total_contributions: float
-    interest_earned: float
 
 class SimulationSave(BaseModel):
     strategy_name: str
@@ -51,34 +46,34 @@ class SimulationSave(BaseModel):
     monthly_contribution: float
     expected_return: float
     years: int
+    inflation_rate: Optional[float] = 0.0
 
 
-# Single year in a forecast breakdown
 class YearlyBreakdown(BaseModel):
     year: int
     balance: float
+    real_balance: float             # inflation-adjusted
     total_contributions: float
     interest_earned: float
 
 
-# What we return when fetching a saved simulation
+class SimulationOutputExtended(BaseModel):
+    final_value: float
+    real_final_value: float         # inflation-adjusted final value
+    total_contributions: float
+    interest_earned: float
+    yearly_breakdown: List[YearlyBreakdown]
+
+
 class SimulationOut(BaseModel):
     id: int
     strategy_name: str
     starting_balance: float
     monthly_contribution: float
     expected_return: float
+    years: int
+    inflation_rate: Optional[float] = None
     final_value: float
     created_at: datetime
 
-    model_config = {
-        "from_attributes": True
-    }
-
-
-# Extended simulation output with yearly breakdown
-class SimulationOutputExtended(BaseModel):
-    final_value: float
-    total_contributions: float
-    interest_earned: float
-    yearly_breakdown: List[YearlyBreakdown]
+    model_config = {"from_attributes": True}
