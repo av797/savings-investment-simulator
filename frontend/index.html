@@ -49,13 +49,10 @@
     .navbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
     .nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
     .nav-right { display: flex; align-items: center; gap: 12px; position: relative; }
-    .nav-user { font-size: 0.82rem; color: var(--muted); }
-    .nav-user span { color: var(--text); font-weight: 500; }
     .btn-sm { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'Inter', sans-serif; font-size: 0.8rem; padding: 7px 14px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
     .btn-sm:hover { border-color: var(--text); color: var(--text); }
-    .btn-sm.danger:hover { border-color: var(--danger); color: var(--danger); }
 
-    /* USER MENU DROPDOWN */
+    /* USER MENU */
     .user-menu-wrap { position: relative; }
     .user-avatar-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; padding: 7px 14px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
     .user-avatar-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -72,6 +69,7 @@
     .dropdown-item.danger:hover { background: rgba(248,113,113,0.08); color: var(--danger); }
     .dropdown-divider { height: 1px; background: var(--border); margin: 6px 0; }
 
+    /* TABS */
     .tab-nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; }
     .tab-btn { padding: 14px 20px; font-size: 0.85rem; font-weight: 500; color: var(--muted); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; border-bottom: 2px solid transparent; transition: all 0.2s; margin-bottom: -1px; }
     .tab-btn:hover { color: var(--text); }
@@ -107,8 +105,6 @@
     .result-card .rc-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
     .result-card .rc-value { font-size: 1.4rem; font-weight: 700; }
     .rc-final { color: var(--success); } .rc-contrib { color: var(--accent); } .rc-interest { color: var(--warning); }
-
-    /* BREAKDOWN TABLE */
     .breakdown-section { margin-top: 24px; display: none; }
     .breakdown-section.visible { display: block; }
     .breakdown-title { font-size: 0.82rem; color: var(--muted); font-weight: 500; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.8px; }
@@ -117,17 +113,27 @@
     .breakdown-table td { padding: 10px 12px; border-bottom: 1px solid #1a1a1a; color: var(--text); }
     .breakdown-table tr:last-child td { border-bottom: none; }
     .breakdown-table tr:hover td { background: rgba(255,255,255,0.02); }
-
-    /* CHART */
     .chart-section { margin-top: 28px; display: none; }
     .chart-section.visible { display: block; }
     .chart-wrap { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; position: relative; height: 320px; }
 
     /* SAVED SIMULATIONS */
+    .saved-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .saved-toolbar .section-title { margin-bottom: 0; }
+    .compare-hint { font-size: 0.78rem; color: var(--muted); }
+    .btn-compare { background: var(--accent); color: #fff; border: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; padding: 9px 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: none; white-space: nowrap; }
+    .btn-compare:hover { background: var(--accent-hover); }
+    .btn-compare.visible { display: block; }
     .saved-list { display: flex; flex-direction: column; gap: 14px; }
     .saved-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; transition: border-color 0.2s; }
     .saved-card:hover { border-color: #3a3a3a; }
-    .saved-card .sc-left { flex: 1; }
+    .saved-card.selected { border-color: var(--accent); background: rgba(79,142,247,0.04); }
+    .saved-card .sc-left { flex: 1; display: flex; align-items: center; gap: 14px; }
+    .saved-card .sc-check { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .saved-card.selected .sc-check { background: var(--accent); border-color: var(--accent); }
+    .saved-card .sc-check svg { display: none; }
+    .saved-card.selected .sc-check svg { display: block; }
+    .saved-card .sc-info { flex: 1; }
     .saved-card .sc-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
     .saved-card .sc-meta { font-size: 0.78rem; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
     .saved-card .sc-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
@@ -139,16 +145,31 @@
     .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.88rem; }
     .empty-state .es-icon { font-size: 2rem; margin-bottom: 12px; }
 
-    /* MODALS */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 100; display: none; }
+    /* COMPARE MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); align-items: center; justify-content: center; z-index: 100; display: none; padding: 24px; }
     .modal-overlay.visible { display: flex; }
     .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 32px; width: 100%; max-width: 400px; }
+    .modal-lg { max-width: 820px; max-height: 90vh; overflow-y: auto; }
     .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
     .modal-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 24px; }
     .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
     .modal-actions .btn { margin-top: 0; flex: 1; }
     .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'Inter', sans-serif; }
     .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+
+    /* COMPARE CONTENT */
+    .cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .cmp-col { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+    .cmp-col.winner { border-color: var(--success); background: rgba(62,207,142,0.04); }
+    .cmp-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .cmp-col-name { font-size: 0.95rem; font-weight: 700; }
+    .cmp-winner-badge { font-size: 0.7rem; font-weight: 600; color: var(--success); background: rgba(62,207,142,0.12); border: 1px solid rgba(62,207,142,0.2); padding: 3px 8px; border-radius: 20px; }
+    .cmp-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #1a1a1a; font-size: 0.82rem; }
+    .cmp-row:last-child { border-bottom: none; }
+    .cmp-row .cmp-label { color: var(--muted); }
+    .cmp-row .cmp-val { font-weight: 500; }
+    .cmp-row .cmp-val.highlight { color: var(--success); font-weight: 700; }
+    .cmp-chart-wrap { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; height: 260px; margin-bottom: 8px; }
 
     /* TOAST */
     #toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; opacity: 0; transform: translateY(8px); transition: all 0.25s; pointer-events: none; z-index: 999; }
@@ -272,7 +293,6 @@
           <div class="result-card"><div class="rc-label">Real Value (inflation-adj.)</div><div class="rc-value rc-contrib" id="res-real">—</div></div>
           <div class="result-card"><div class="rc-label">Interest Earned</div><div class="rc-value rc-interest" id="res-interest">—</div></div>
         </div>
-        <!-- Year by year table -->
         <div class="breakdown-section" id="breakdown-section">
           <div class="breakdown-title">Year by Year Breakdown</div>
           <table class="breakdown-table">
@@ -280,19 +300,22 @@
             <tbody id="breakdown-body"></tbody>
           </table>
         </div>
-        <!-- Chart -->
         <div class="chart-section" id="chart-section">
           <div class="breakdown-title" style="margin-bottom:16px;">Balance Over Time</div>
-          <div class="chart-wrap">
-            <canvas id="sim-chart"></canvas>
-          </div>
+          <div class="chart-wrap"><canvas id="sim-chart"></canvas></div>
         </div>
       </div>
     </div>
 
     <!-- Saved Simulations -->
     <div class="tab-panel" id="tab-saved">
-      <div class="section-title">Saved Simulations</div>
+      <div class="saved-toolbar">
+        <div class="section-title">Saved Simulations</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="compare-hint" id="compare-hint"></span>
+          <button class="btn-compare" id="compare-btn" onclick="openCompareModal()">Compare →</button>
+        </div>
+      </div>
       <div class="saved-list" id="saved-list">
         <div class="empty-state"><div class="es-icon">📊</div>Loading...</div>
       </div>
@@ -314,7 +337,7 @@
   </div>
 </div>
 
-<!-- Delete account confirm modal -->
+<!-- Delete account modal -->
 <div class="modal-overlay" id="delete-modal">
   <div class="modal">
     <div class="modal-title">Delete Account</div>
@@ -322,6 +345,22 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
       <button class="btn btn-primary" style="background:var(--danger);" onclick="confirmDeleteMe()" id="confirm-delete-btn">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Compare modal -->
+<div class="modal-overlay" id="compare-modal">
+  <div class="modal modal-lg">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div class="modal-title" style="margin-bottom:0;">Simulation Comparison</div>
+      <button onclick="closeCompareModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;line-height:1;">✕</button>
+    </div>
+    <div class="modal-sub">Comparing final portfolio value over time.</div>
+    <div class="cmp-grid" id="cmp-grid"></div>
+    <div class="cmp-chart-wrap"><canvas id="cmp-chart"></canvas></div>
+    <div style="margin-top:16px;text-align:right;">
+      <button class="btn btn-ghost" style="width:auto;padding:10px 24px;" onclick="closeCompareModal()">Close</button>
     </div>
   </div>
 </div>
@@ -334,6 +373,9 @@
   let lastSimData = null;
   let currentUser = null;
   let simChart = null;
+  let cmpChart = null;
+  let selectedIds = [];
+  let savedSimsCache = [];
 
   // ── Password toggle ──
   function togglePw(inputId, btn) {
@@ -373,24 +415,17 @@
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
-    if (tab === 'saved') loadSaved();
+    if (tab === 'saved') { selectedIds = []; loadSaved(); }
   }
 
-  // ── Toast ──
   function toast(msg, type = 'ok') {
     const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = `show ${type}`;
+    el.textContent = msg; el.className = `show ${type}`;
     setTimeout(() => el.className = '', 3000);
   }
 
-  function fmt(n) {
-    return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  function fmtDate(str) {
-    return new Date(str).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
+  function fmt(n) { return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmtDate(str) { return new Date(str).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
 
   // ── Register ──
   async function doRegister() {
@@ -409,11 +444,8 @@
         }),
       });
       const data = await res.json();
-      if (res.ok) {
-        toast('Account created! Please log in.', 'ok');
-        switchTab('login');
-        document.getElementById('login-email').value = document.getElementById('reg-email').value;
-      } else err.textContent = data.detail || 'Registration failed.';
+      if (res.ok) { toast('Account created! Please log in.', 'ok'); switchTab('login'); document.getElementById('login-email').value = document.getElementById('reg-email').value; }
+      else err.textContent = data.detail || 'Registration failed.';
     } catch (e) { err.textContent = 'Could not reach server.'; }
     btn.disabled = false; btn.textContent = 'Create Account';
   }
@@ -426,10 +458,7 @@
     try {
       const res = await fetch(`${BASE}/users/login`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: document.getElementById('login-email').value,
-          password: document.getElementById('login-password').value,
-        }),
+        body: JSON.stringify({ email: document.getElementById('login-email').value, password: document.getElementById('login-password').value }),
       });
       const data = await res.json();
       if (res.ok && data.access_token) { token = data.access_token; await loadDashboard(); }
@@ -449,21 +478,19 @@
       document.getElementById('dropdown-email').textContent = currentUser.email;
       document.getElementById('greeting-name').textContent  = name;
       document.getElementById('profile-income').textContent = fmt(currentUser.monthly_income);
-      document.getElementById('profile-risk').textContent   = currentUser.risk_profile
-        ? currentUser.risk_profile.charAt(0).toUpperCase() + currentUser.risk_profile.slice(1) : '—';
+      document.getElementById('profile-risk').textContent   = currentUser.risk_profile ? currentUser.risk_profile.charAt(0).toUpperCase() + currentUser.risk_profile.slice(1) : '—';
       document.getElementById('profile-age').textContent    = currentUser.age + ' yrs';
       document.getElementById('auth-screen').style.display      = 'none';
       document.getElementById('dashboard-screen').style.display = 'flex';
       toast('Welcome back!', 'ok');
-    } catch (e) {
-      document.getElementById('login-error').textContent = 'Login succeeded but could not load profile.';
-    }
+    } catch (e) { document.getElementById('login-error').textContent = 'Login succeeded but could not load profile.'; }
   }
 
   // ── Logout ──
   function doLogout() {
-    token = null; lastSimData = null; currentUser = null;
+    token = null; lastSimData = null; currentUser = null; selectedIds = []; savedSimsCache = [];
     if (simChart) { simChart.destroy(); simChart = null; }
+    if (cmpChart) { cmpChart.destroy(); cmpChart = null; }
     document.getElementById('dashboard-screen').style.display = 'none';
     document.getElementById('auth-screen').style.display      = 'flex';
     document.getElementById('results-row').classList.remove('visible');
@@ -477,108 +504,30 @@
     toast('Logged out', 'ok');
   }
 
-  // ── Render chart ──
+  // ── Simulator chart ──
   function renderChart(breakdown) {
-    const labels  = breakdown.map(r => `Year ${r.year}`);
-    const nominal = breakdown.map(r => r.balance);
-    const real    = breakdown.map(r => r.real_balance);
-    const contrib = breakdown.map(r => r.total_contributions);
-
     if (simChart) { simChart.destroy(); simChart = null; }
-
     const ctx = document.getElementById('sim-chart').getContext('2d');
-
     simChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels,
+        labels: breakdown.map(r => `Year ${r.year}`),
         datasets: [
-          {
-            label: 'Nominal Balance',
-            data: nominal,
-            borderColor: '#3ecf8e',
-            backgroundColor: 'rgba(62,207,142,0.08)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.4,
-            pointRadius: 0,
-            pointHoverRadius: 5,
-            pointHoverBackgroundColor: '#3ecf8e',
-          },
-          {
-            label: 'Real Balance (inflation-adj.)',
-            data: real,
-            borderColor: '#4f8ef7',
-            backgroundColor: 'rgba(79,142,247,0.06)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.4,
-            pointRadius: 0,
-            pointHoverRadius: 5,
-            pointHoverBackgroundColor: '#4f8ef7',
-            borderDash: [5, 4],
-          },
-          {
-            label: 'Total Contributions',
-            data: contrib,
-            borderColor: '#f4c55a',
-            backgroundColor: 'rgba(244,197,90,0.05)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.4,
-            pointRadius: 0,
-            pointHoverRadius: 5,
-            pointHoverBackgroundColor: '#f4c55a',
-            borderDash: [3, 3],
-          },
+          { label: 'Nominal Balance', data: breakdown.map(r => r.balance), borderColor: '#3ecf8e', backgroundColor: 'rgba(62,207,142,0.08)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5 },
+          { label: 'Real Balance', data: breakdown.map(r => r.real_balance), borderColor: '#4f8ef7', backgroundColor: 'rgba(79,142,247,0.06)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5, borderDash: [5,4] },
+          { label: 'Total Contributions', data: breakdown.map(r => r.total_contributions), borderColor: '#f4c55a', backgroundColor: 'rgba(244,197,90,0.05)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5, borderDash: [3,3] },
         ],
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: {
-            display: true,
-            position: 'top',
-            labels: {
-              color: '#888',
-              font: { family: 'Inter', size: 11 },
-              boxWidth: 12,
-              padding: 16,
-              usePointStyle: true,
-              pointStyle: 'line',
-            },
-          },
-          tooltip: {
-            backgroundColor: '#1e1e1e',
-            borderColor: '#2a2a2a',
-            borderWidth: 1,
-            titleColor: '#f0f0f0',
-            bodyColor: '#888',
-            titleFont: { family: 'Inter', size: 12, weight: '600' },
-            bodyFont: { family: 'Inter', size: 11 },
-            padding: 12,
-            callbacks: {
-              label: ctx => ` ${ctx.dataset.label}: £${Number(ctx.parsed.y).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-            },
-          },
+          legend: { display: true, position: 'top', labels: { color: '#888', font: { family: 'Inter', size: 11 }, boxWidth: 12, padding: 16, usePointStyle: true, pointStyle: 'line' } },
+          tooltip: { backgroundColor: '#1e1e1e', borderColor: '#2a2a2a', borderWidth: 1, titleColor: '#f0f0f0', bodyColor: '#888', titleFont: { family: 'Inter', size: 12, weight: '600' }, bodyFont: { family: 'Inter', size: 11 }, padding: 12, callbacks: { label: ctx => ` ${ctx.dataset.label}: £${Number(ctx.parsed.y).toLocaleString('en-GB', { maximumFractionDigits: 0 })}` } },
         },
         scales: {
-          x: {
-            grid: { color: 'rgba(255,255,255,0.03)' },
-            ticks: { color: '#555', font: { family: 'Inter', size: 11 }, maxTicksLimit: 10 },
-            border: { color: '#2a2a2a' },
-          },
-          y: {
-            grid: { color: 'rgba(255,255,255,0.03)' },
-            ticks: {
-              color: '#555',
-              font: { family: 'Inter', size: 11 },
-              callback: v => '£' + Number(v).toLocaleString('en-GB', { notation: 'compact', maximumFractionDigits: 1 }),
-            },
-            border: { color: '#2a2a2a' },
-          },
+          x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555', font: { family: 'Inter', size: 11 }, maxTicksLimit: 10 }, border: { color: '#2a2a2a' } },
+          y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555', font: { family: 'Inter', size: 11 }, callback: v => '£' + Number(v).toLocaleString('en-GB', { notation: 'compact', maximumFractionDigits: 1 }) }, border: { color: '#2a2a2a' } },
         },
       },
     });
@@ -609,25 +558,14 @@
         document.getElementById('res-real').textContent     = fmt(data.real_final_value);
         document.getElementById('res-interest').textContent = fmt(data.interest_earned);
         document.getElementById('results-row').classList.add('visible');
-
-        // Table
         const tbody = document.getElementById('breakdown-body');
         tbody.innerHTML = '';
         data.yearly_breakdown.forEach(row => {
-          tbody.innerHTML += `<tr>
-            <td>Year ${row.year}</td>
-            <td>${fmt(row.balance)}</td>
-            <td>${fmt(row.real_balance)}</td>
-            <td>${fmt(row.total_contributions)}</td>
-            <td>${fmt(row.interest_earned)}</td>
-          </tr>`;
+          tbody.innerHTML += `<tr><td>Year ${row.year}</td><td>${fmt(row.balance)}</td><td>${fmt(row.real_balance)}</td><td>${fmt(row.total_contributions)}</td><td>${fmt(row.interest_earned)}</td></tr>`;
         });
         document.getElementById('breakdown-section').classList.add('visible');
-
-        // Chart
         renderChart(data.yearly_breakdown);
         document.getElementById('chart-section').classList.add('visible');
-
         document.getElementById('save-btn').classList.add('visible');
         toast('Simulation complete!', 'ok');
       } else toast(data.detail || 'Simulation failed', 'err');
@@ -636,14 +574,9 @@
   }
 
   // ── Save modal ──
-  function openSaveModal() {
-    document.getElementById('strategy-name').value = '';
-    document.getElementById('save-modal').classList.add('visible');
-    setTimeout(() => document.getElementById('strategy-name').focus(), 100);
-  }
+  function openSaveModal() { document.getElementById('strategy-name').value = ''; document.getElementById('save-modal').classList.add('visible'); setTimeout(() => document.getElementById('strategy-name').focus(), 100); }
   function closeSaveModal() { document.getElementById('save-modal').classList.remove('visible'); }
 
-  // ── Save simulation ──
   async function doSave() {
     if (!token) { toast('Please login first', 'err'); return; }
     const name = document.getElementById('strategy-name').value.trim();
@@ -657,20 +590,62 @@
         body: JSON.stringify({ ...lastSimData, strategy_name: name }),
       });
       const data = await res.json();
-      if (res.ok) { closeSaveModal(); toast('Simulation saved!', 'ok'); }
+      if (res.ok) { 
+        closeSaveModal();
+        toast('Simulation saved!', 'ok');
+        document.getElementById('sim-start').value = '';
+        document.getElementById('sim-monthly').value = '';
+        document.getElementById('sim-return').value = '';
+        document.getElementById('sim-years').value = '';
+        document.getElementById('sim-inflation').value = '';
+
+        document.getElementById('results-row').classList.remove('visible');
+        document.getElementById('breakdown-section').classList.remove('visible');
+        document.getElementById('chart-section').classList.remove('visible');
+        document.getElementById('save-btn').classList.remove('visible');
+        if (simChart) { simChart.destroy(); simChart = null; }
+        lastSimData = null;
+      }
       else toast(data.detail || 'Save failed', 'err');
     } catch (e) { toast('Could not reach server', 'err'); }
     btn.disabled = false; btn.textContent = 'Save';
   }
 
-  // ── Load saved simulations ──
+  // ── Checkbox selection ──
+  function toggleSelect(id) {
+    const card = document.getElementById(`sim-card-${id}`);
+    if (selectedIds.includes(id)) {
+      selectedIds = selectedIds.filter(x => x !== id);
+      card.classList.remove('selected');
+    } else {
+      if (selectedIds.length >= 2) { toast('You can only compare 2 simulations', 'err'); return; }
+      selectedIds.push(id);
+      card.classList.add('selected');
+    }
+    updateCompareBtn();
+  }
+
+  function updateCompareBtn() {
+    const btn  = document.getElementById('compare-btn');
+    const hint = document.getElementById('compare-hint');
+    if (selectedIds.length === 2) {
+      btn.classList.add('visible');
+      hint.textContent = '2 selected';
+    } else {
+      btn.classList.remove('visible');
+      hint.textContent = selectedIds.length === 1 ? '1 of 2 selected' : '';
+    }
+  }
+
+  // ── Load saved ──
   async function loadSaved() {
     if (!token) return;
     const list = document.getElementById('saved-list');
     list.innerHTML = '<div class="empty-state"><div class="es-icon">⏳</div>Loading...</div>';
     try {
-      const res = await fetch(`${BASE}/simulate/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const res  = await fetch(`${BASE}/simulate/me`, { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
+      savedSimsCache = data;
       if (!data.length) {
         list.innerHTML = '<div class="empty-state"><div class="es-icon">📊</div>No saved simulations yet. Run one and save it!</div>';
         return;
@@ -678,13 +653,18 @@
       list.innerHTML = data.map(sim => `
         <div class="saved-card" id="sim-card-${sim.id}">
           <div class="sc-left">
-            <div class="sc-name">${sim.strategy_name}</div>
-            <div class="sc-meta">
-              <span>Start: ${fmt(sim.starting_balance)}</span>
-              <span>Monthly: ${fmt(sim.monthly_contribution)}</span>
-              <span>Return: ${(sim.expected_return * 100).toFixed(1)}%</span>
-              <span>Years: ${sim.years}</span>
-              <span>Saved: ${fmtDate(sim.created_at)}</span>
+            <div class="sc-check" onclick="toggleSelect(${sim.id})">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="sc-info">
+              <div class="sc-name">${sim.strategy_name}</div>
+              <div class="sc-meta">
+                <span>Start: ${fmt(sim.starting_balance)}</span>
+                <span>Monthly: ${fmt(sim.monthly_contribution)}</span>
+                <span>Return: ${(sim.expected_return * 100).toFixed(1)}%</span>
+                <span>Years: ${sim.years}</span>
+                <span>Saved: ${fmtDate(sim.created_at)}</span>
+              </div>
             </div>
           </div>
           <div class="sc-right">
@@ -698,22 +678,18 @@
 
   // ── Load simulation into form ──
   async function loadSimulation(id) {
-    try {
-      const res = await fetch(`${BASE}/simulate/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-      const data = await res.json();
-      const sim = data.find(s => s.id === id);
-      if (!sim) { toast('Simulation not found', 'err'); return; }
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.tab-btn')[1].classList.add('active');
-      document.getElementById('tab-simulator').classList.add('active');
-      document.getElementById('sim-start').value     = sim.starting_balance;
-      document.getElementById('sim-monthly').value   = sim.monthly_contribution;
-      document.getElementById('sim-return').value    = sim.expected_return;
-      document.getElementById('sim-years').value     = sim.years;
-      document.getElementById('sim-inflation').value = sim.inflation_rate || '';
-      toast(`Loaded "${sim.strategy_name}" — click Run to simulate`, 'ok');
-    } catch (e) { toast('Could not load simulation', 'err'); }
+    const sim = savedSimsCache.find(s => s.id === id);
+    if (!sim) { toast('Simulation not found', 'err'); return; }
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('tab-simulator').classList.add('active');
+    document.getElementById('sim-start').value     = sim.starting_balance;
+    document.getElementById('sim-monthly').value   = sim.monthly_contribution;
+    document.getElementById('sim-return').value    = sim.expected_return;
+    document.getElementById('sim-years').value     = sim.years;
+    document.getElementById('sim-inflation').value = sim.inflation_rate || '';
+    toast(`Loaded "${sim.strategy_name}" — click Run to simulate`, 'ok');
   }
 
   // ── Delete simulation ──
@@ -722,6 +698,9 @@
     try {
       const res = await fetch(`${BASE}/simulate/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) {
+        savedSimsCache = savedSimsCache.filter(s => s.id !== id);
+        selectedIds = selectedIds.filter(x => x !== id);
+        updateCompareBtn();
         document.getElementById(`sim-card-${id}`)?.remove();
         toast('Simulation deleted', 'ok');
         if (!document.getElementById('saved-list').querySelector('.saved-card')) {
@@ -729,6 +708,90 @@
         }
       } else toast('Delete failed', 'err');
     } catch (e) { toast('Could not reach server', 'err'); }
+  }
+
+  // ── Compare modal ──
+  function openCompareModal() {
+    if (selectedIds.length !== 2) { toast('Select exactly 2 simulations', 'err'); return; }
+    const [a, b] = selectedIds.map(id => savedSimsCache.find(s => s.id === id));
+    const winner = a.final_value >= b.final_value ? a : b;
+
+    function col(sim, isWinner) {
+      return `
+        <div class="cmp-col ${isWinner ? 'winner' : ''}">
+          <div class="cmp-col-header">
+            <div class="cmp-col-name">${sim.strategy_name}</div>
+            ${isWinner ? '<div class="cmp-winner-badge">✓ Winner</div>' : ''}
+          </div>
+          <div class="cmp-row"><span class="cmp-label">Starting Balance</span><span class="cmp-val">${fmt(sim.starting_balance)}</span></div>
+          <div class="cmp-row"><span class="cmp-label">Monthly Contribution</span><span class="cmp-val">${fmt(sim.monthly_contribution)}</span></div>
+          <div class="cmp-row"><span class="cmp-label">Annual Return</span><span class="cmp-val">${(sim.expected_return * 100).toFixed(1)}%</span></div>
+          <div class="cmp-row"><span class="cmp-label">Years</span><span class="cmp-val">${sim.years}</span></div>
+          <div class="cmp-row"><span class="cmp-label">Inflation Rate</span><span class="cmp-val">${sim.inflation_rate ? (sim.inflation_rate * 100).toFixed(1) + '%' : '—'}</span></div>
+          <div class="cmp-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+            <span class="cmp-label">Final Value</span>
+            <span class="cmp-val ${isWinner ? 'highlight' : ''}">${fmt(sim.final_value)}</span>
+          </div>
+        </div>`;
+    }
+
+    document.getElementById('cmp-grid').innerHTML = col(a, a === winner) + col(b, b === winner);
+    document.getElementById('compare-modal').classList.add('visible');
+
+    // Build comparison chart using saved years as x-axis approximation
+    setTimeout(() => renderCompareChart(a, b), 50);
+  }
+
+  function renderCompareChart(a, b) {
+    if (cmpChart) { cmpChart.destroy(); cmpChart = null; }
+
+    // Generate approximate yearly balance curve from saved data
+    function buildCurve(sim) {
+      const points = [];
+      const monthlyRate = sim.expected_return / 12;
+      let bal = sim.starting_balance;
+      for (let y = 1; y <= sim.years; y++) {
+        for (let m = 0; m < 12; m++) {
+          bal = bal * (1 + monthlyRate) + sim.monthly_contribution;
+        }
+        points.push(parseFloat(bal.toFixed(2)));
+      }
+      return points;
+    }
+
+    const maxYears = Math.max(a.years, b.years);
+    const labels   = Array.from({ length: maxYears }, (_, i) => `Year ${i + 1}`);
+    const curveA   = buildCurve(a);
+    const curveB   = buildCurve(b);
+
+    const ctx = document.getElementById('cmp-chart').getContext('2d');
+    cmpChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: a.strategy_name, data: curveA, borderColor: '#3ecf8e', backgroundColor: 'rgba(62,207,142,0.08)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5 },
+          { label: b.strategy_name, data: curveB, borderColor: '#4f8ef7', backgroundColor: 'rgba(79,142,247,0.06)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5 },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: true, position: 'top', labels: { color: '#888', font: { family: 'Inter', size: 11 }, boxWidth: 12, padding: 16, usePointStyle: true, pointStyle: 'line' } },
+          tooltip: { backgroundColor: '#1e1e1e', borderColor: '#2a2a2a', borderWidth: 1, titleColor: '#f0f0f0', bodyColor: '#888', titleFont: { family: 'Inter', size: 12, weight: '600' }, bodyFont: { family: 'Inter', size: 11 }, padding: 12, callbacks: { label: ctx => ` ${ctx.dataset.label}: £${Number(ctx.parsed.y).toLocaleString('en-GB', { maximumFractionDigits: 0 })}` } },
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555', font: { family: 'Inter', size: 11 }, maxTicksLimit: 10 }, border: { color: '#2a2a2a' } },
+          y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#555', font: { family: 'Inter', size: 11 }, callback: v => '£' + Number(v).toLocaleString('en-GB', { notation: 'compact', maximumFractionDigits: 1 }) }, border: { color: '#2a2a2a' } },
+        },
+      },
+    });
+  }
+
+  function closeCompareModal() {
+    document.getElementById('compare-modal').classList.remove('visible');
+    if (cmpChart) { cmpChart.destroy(); cmpChart = null; }
   }
 
   // ── Delete account ──
@@ -743,10 +806,7 @@
     const btn = document.getElementById('confirm-delete-btn');
     btn.disabled = true; btn.textContent = 'Deleting...';
     try {
-      const res = await fetch(`${BASE}/users/me`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const res = await fetch(`${BASE}/users/me`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) { closeDeleteModal(); toast('Account deleted', 'ok'); doLogout(); }
       else { const data = await res.json(); toast(data.detail || 'Delete failed', 'err'); }
     } catch (e) { toast('Could not reach server', 'err'); }
