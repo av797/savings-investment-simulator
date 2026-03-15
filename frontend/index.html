@@ -117,6 +117,13 @@
     .chart-section.visible { display: block; }
     .chart-wrap { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; position: relative; height: 320px; }
 
+    /* SCORE BADGE */
+    .score-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .score-badge.high { color: var(--success); background: rgba(62,207,142,0.12); border: 1px solid rgba(62,207,142,0.25); }
+    .score-badge.mid  { color: var(--warning); background: rgba(244,197,90,0.12);  border: 1px solid rgba(244,197,90,0.25); }
+    .score-badge.low  { color: var(--danger);  background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.25); }
+    .score-badge.none { color: var(--muted);   background: rgba(255,255,255,0.04); border: 1px solid var(--border); }
+
     /* SAVED SIMULATIONS */
     .saved-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .saved-toolbar .section-title { margin-bottom: 0; }
@@ -134,7 +141,7 @@
     .saved-card .sc-check svg { display: none; }
     .saved-card.selected .sc-check svg { display: block; }
     .saved-card .sc-info { flex: 1; }
-    .saved-card .sc-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+    .saved-card .sc-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
     .saved-card .sc-meta { font-size: 0.78rem; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
     .saved-card .sc-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
     .saved-card .sc-value { font-size: 1.1rem; font-weight: 700; color: var(--success); }
@@ -377,6 +384,13 @@
   let selectedIds = [];
   let savedSimsCache = [];
 
+  // ── Score badge helper ──
+  function scoreBadge(score) {
+    if (score === null || score === undefined) return `<span class="score-badge none">No score</span>`;
+    const cls = score >= 75 ? 'high' : score >= 50 ? 'mid' : 'low';
+    return `<span class="score-badge ${cls}">● ${score}/100</span>`;
+  }
+
   // ── Password toggle ──
   function togglePw(inputId, btn) {
     const input = document.getElementById(inputId);
@@ -431,35 +445,24 @@
   async function doRegister() {
     const btn = document.getElementById('register-btn');
     const err = document.getElementById('register-error');
-    err.textContent = ''; 
-    
+    err.textContent = '';
+
     const age      = parseInt(document.getElementById('reg-age').value);
     const password = document.getElementById('reg-password').value;
     const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
 
-    if (age < 16) {
-      err.textContent = 'You must be at least 16 to register.';
-      return;
-    }
-    if (password.length < 8) {
-      err.textContent = 'Password must be at least 8 characters.';
-      return;
-    }
-    if (!hasSymbol) {
-      err.textContent = 'Password must contain at least one symbol (e.g. !@#$%).';
-      return;
-    }
+    if (age < 16) { err.textContent = 'You must be at least 16 to register.'; return; }
+    if (password.length < 8) { err.textContent = 'Password must be at least 8 characters.'; return; }
+    if (!hasSymbol) { err.textContent = 'Password must contain at least one symbol (e.g. !@#$%).'; return; }
 
-    btn.disabled = true; 
-    btn.textContent = 'Creating...';
-
+    btn.disabled = true; btn.textContent = 'Creating...';
     try {
       const res = await fetch(`${BASE}/users/users`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: document.getElementById('reg-email').value,
-          password: document.getElementById('reg-password').value,
-          age: parseInt(document.getElementById('reg-age').value),
+          password,
+          age,
           risk_profile: document.getElementById('reg-risk').value,
           monthly_income: parseFloat(document.getElementById('reg-income').value),
         }),
@@ -611,7 +614,7 @@
         body: JSON.stringify({ ...lastSimData, strategy_name: name }),
       });
       const data = await res.json();
-      if (res.ok) { 
+      if (res.ok) {
         closeSaveModal();
         toast('Simulation saved!', 'ok');
         document.getElementById('sim-start').value = '';
@@ -619,15 +622,13 @@
         document.getElementById('sim-return').value = '';
         document.getElementById('sim-years').value = '';
         document.getElementById('sim-inflation').value = '';
-
         document.getElementById('results-row').classList.remove('visible');
         document.getElementById('breakdown-section').classList.remove('visible');
         document.getElementById('chart-section').classList.remove('visible');
         document.getElementById('save-btn').classList.remove('visible');
         if (simChart) { simChart.destroy(); simChart = null; }
         lastSimData = null;
-      }
-      else toast(data.detail || 'Save failed', 'err');
+      } else toast(data.detail || 'Save failed', 'err');
     } catch (e) { toast('Could not reach server', 'err'); }
     btn.disabled = false; btn.textContent = 'Save';
   }
@@ -649,13 +650,8 @@
   function updateCompareBtn() {
     const btn  = document.getElementById('compare-btn');
     const hint = document.getElementById('compare-hint');
-    if (selectedIds.length === 2) {
-      btn.classList.add('visible');
-      hint.textContent = '2 selected';
-    } else {
-      btn.classList.remove('visible');
-      hint.textContent = selectedIds.length === 1 ? '1 of 2 selected' : '';
-    }
+    if (selectedIds.length === 2) { btn.classList.add('visible'); hint.textContent = '2 selected'; }
+    else { btn.classList.remove('visible'); hint.textContent = selectedIds.length === 1 ? '1 of 2 selected' : ''; }
   }
 
   // ── Load saved ──
@@ -678,7 +674,10 @@
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
             <div class="sc-info">
-              <div class="sc-name">${sim.strategy_name}</div>
+              <div class="sc-name">
+                ${sim.strategy_name}
+                ${scoreBadge(sim.score)}
+              </div>
               <div class="sc-meta">
                 <span>Start: ${fmt(sim.starting_balance)}</span>
                 <span>Monthly: ${fmt(sim.monthly_contribution)}</span>
@@ -698,7 +697,7 @@
   }
 
   // ── Load simulation into form ──
-  async function loadSimulation(id) {
+  function loadSimulation(id) {
     const sim = savedSimsCache.find(s => s.id === id);
     if (!sim) { toast('Simulation not found', 'err'); return; }
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -749,6 +748,7 @@
           <div class="cmp-row"><span class="cmp-label">Annual Return</span><span class="cmp-val">${(sim.expected_return * 100).toFixed(1)}%</span></div>
           <div class="cmp-row"><span class="cmp-label">Years</span><span class="cmp-val">${sim.years}</span></div>
           <div class="cmp-row"><span class="cmp-label">Inflation Rate</span><span class="cmp-val">${sim.inflation_rate ? (sim.inflation_rate * 100).toFixed(1) + '%' : '—'}</span></div>
+          <div class="cmp-row"><span class="cmp-label">Plan Score</span><span class="cmp-val">${scoreBadge(sim.score)}</span></div>
           <div class="cmp-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
             <span class="cmp-label">Final Value</span>
             <span class="cmp-val ${isWinner ? 'highlight' : ''}">${fmt(sim.final_value)}</span>
@@ -758,41 +758,31 @@
 
     document.getElementById('cmp-grid').innerHTML = col(a, a === winner) + col(b, b === winner);
     document.getElementById('compare-modal').classList.add('visible');
-
-    // Build comparison chart using saved years as x-axis approximation
     setTimeout(() => renderCompareChart(a, b), 50);
   }
 
   function renderCompareChart(a, b) {
     if (cmpChart) { cmpChart.destroy(); cmpChart = null; }
-
-    // Generate approximate yearly balance curve from saved data
     function buildCurve(sim) {
       const points = [];
       const monthlyRate = sim.expected_return / 12;
       let bal = sim.starting_balance;
       for (let y = 1; y <= sim.years; y++) {
-        for (let m = 0; m < 12; m++) {
-          bal = bal * (1 + monthlyRate) + sim.monthly_contribution;
-        }
+        for (let m = 0; m < 12; m++) bal = bal * (1 + monthlyRate) + sim.monthly_contribution;
         points.push(parseFloat(bal.toFixed(2)));
       }
       return points;
     }
-
     const maxYears = Math.max(a.years, b.years);
     const labels   = Array.from({ length: maxYears }, (_, i) => `Year ${i + 1}`);
-    const curveA   = buildCurve(a);
-    const curveB   = buildCurve(b);
-
     const ctx = document.getElementById('cmp-chart').getContext('2d');
     cmpChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
         datasets: [
-          { label: a.strategy_name, data: curveA, borderColor: '#3ecf8e', backgroundColor: 'rgba(62,207,142,0.08)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5 },
-          { label: b.strategy_name, data: curveB, borderColor: '#4f8ef7', backgroundColor: 'rgba(79,142,247,0.06)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5 },
+          { label: a.strategy_name, data: buildCurve(a), borderColor: '#3ecf8e', backgroundColor: 'rgba(62,207,142,0.08)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5 },
+          { label: b.strategy_name, data: buildCurve(b), borderColor: '#4f8ef7', backgroundColor: 'rgba(79,142,247,0.06)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5 },
         ],
       },
       options: {
@@ -822,7 +812,6 @@
     document.getElementById('delete-modal').classList.add('visible');
   }
   function closeDeleteModal() { document.getElementById('delete-modal').classList.remove('visible'); }
-
   async function confirmDeleteMe() {
     const btn = document.getElementById('confirm-delete-btn');
     btn.disabled = true; btn.textContent = 'Deleting...';

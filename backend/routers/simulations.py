@@ -66,7 +66,7 @@ def save_simulation(
         data.expected_return,
         data.years,
         data.inflation_rate or 0.0,
-        user.monthly_income,
+        float(user.monthly_income),
     )
 
     sim = models.Simulation(
