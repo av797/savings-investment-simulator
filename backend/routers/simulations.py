@@ -5,7 +5,7 @@ from typing import List
 from backend.db.database import get_db
 from backend.db import models
 from backend.schemas import SimulationInput, SimulationOutputExtended, SimulationSave, SimulationOut
-from backend.simulations.simulation_math import run_simulation, run_simulation_yearly
+from backend.simulations.simulation_math import run_simulation, run_simulation_yearly, calculate_score
 from backend.dependencies import get_current_user
 
 router = APIRouter(prefix="/simulate", tags=["Simulations"])
@@ -49,12 +49,24 @@ def save_simulation(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
     final_value, _, _, _ = run_simulation(
         starting_balance=data.starting_balance,
         monthly_contribution=data.monthly_contribution,
         expected_return=data.expected_return,
         years=data.years,
         inflation_rate=data.inflation_rate or 0.0,
+    )
+
+    score = calculate_score(
+        data.starting_balance,
+        data.monthly_contribution,
+        data.expected_return,
+        data.years,
+        data.inflation_rate or 0.0,
+        user.monthly_income,
     )
 
     sim = models.Simulation(
@@ -66,6 +78,7 @@ def save_simulation(
         years=data.years,
         inflation_rate=data.inflation_rate or 0.0,
         final_value=round(final_value, 2),
+        score=score,
     )
 
     db.add(sim)

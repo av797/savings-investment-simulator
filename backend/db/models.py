@@ -70,6 +70,7 @@ class Simulation(Base):
     years = Column(Integer)
     inflation_rate = Column(Numeric, default=0.0)
     final_value = Column(Numeric)
+    score = Column(Integer, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
 
     user = relationship("User", back_populates="simulations")

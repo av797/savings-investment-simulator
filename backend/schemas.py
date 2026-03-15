@@ -74,6 +74,7 @@ class SimulationOut(BaseModel):
     years: int
     inflation_rate: Optional[float] = None
     final_value: float
+    score: Optional[int] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

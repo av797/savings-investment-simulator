@@ -49,3 +49,45 @@ def run_simulation_yearly(starting_balance, monthly_contribution, expected_retur
         })
 
     return breakdown
+
+
+def calculate_score(starting_balance, monthly_contribution, expected_return, years, inflation_rate, monthly_income) -> int:
+    score = 0
+
+    # Return rate realism (25pts)
+    if 0.05 <= expected_return <= 0.08:
+        score += 25
+    elif 0.08 < expected_return <= 0.12:
+        score += 12
+
+    # Savings rate (25pts)
+    if monthly_income and monthly_income > 0:
+        rate = monthly_contribution / monthly_income
+        if rate >= 0.20:
+            score += 25
+        elif rate >= 0.10:
+            score += 12
+        else:
+            score += 5
+
+    # Time horizon (20pts)
+    if years >= 25:
+        score += 20
+    elif years >= 15:
+        score += 12
+    elif years >= 10:
+        score += 6
+
+    # Inflation awareness (15pts)
+    if inflation_rate and inflation_rate > 0:
+        score += 15
+
+    # Starting balance (15pts)
+    if starting_balance >= 10000:
+        score += 15
+    elif starting_balance >= 1000:
+        score += 8
+    elif starting_balance > 0:
+        score += 3
+
+    return score

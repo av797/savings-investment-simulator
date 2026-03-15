@@ -431,7 +431,28 @@
   async function doRegister() {
     const btn = document.getElementById('register-btn');
     const err = document.getElementById('register-error');
-    err.textContent = ''; btn.disabled = true; btn.textContent = 'Creating...';
+    err.textContent = ''; 
+    
+    const age      = parseInt(document.getElementById('reg-age').value);
+    const password = document.getElementById('reg-password').value;
+    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+    if (age < 16) {
+      err.textContent = 'You must be at least 16 to register.';
+      return;
+    }
+    if (password.length < 8) {
+      err.textContent = 'Password must be at least 8 characters.';
+      return;
+    }
+    if (!hasSymbol) {
+      err.textContent = 'Password must contain at least one symbol (e.g. !@#$%).';
+      return;
+    }
+
+    btn.disabled = true; 
+    btn.textContent = 'Creating...';
+
     try {
       const res = await fetch(`${BASE}/users/users`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
