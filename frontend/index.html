@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>WealthSim</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -106,6 +107,8 @@
     .result-card .rc-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
     .result-card .rc-value { font-size: 1.4rem; font-weight: 700; }
     .rc-final { color: var(--success); } .rc-contrib { color: var(--accent); } .rc-interest { color: var(--warning); }
+
+    /* BREAKDOWN TABLE */
     .breakdown-section { margin-top: 24px; display: none; }
     .breakdown-section.visible { display: block; }
     .breakdown-title { font-size: 0.82rem; color: var(--muted); font-weight: 500; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.8px; }
@@ -114,6 +117,11 @@
     .breakdown-table td { padding: 10px 12px; border-bottom: 1px solid #1a1a1a; color: var(--text); }
     .breakdown-table tr:last-child td { border-bottom: none; }
     .breakdown-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* CHART */
+    .chart-section { margin-top: 28px; display: none; }
+    .chart-section.visible { display: block; }
+    .chart-wrap { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; position: relative; height: 320px; }
 
     /* SAVED SIMULATIONS */
     .saved-list { display: flex; flex-direction: column; gap: 14px; }
@@ -201,7 +209,6 @@
   <nav class="navbar">
     <div class="nav-logo">WealthSim</div>
     <div class="nav-right">
-      <!-- User menu dropdown -->
       <div class="user-menu-wrap">
         <button class="user-avatar-btn" id="user-menu-btn" onclick="toggleUserMenu()">
           <span id="nav-email">—</span>
@@ -265,12 +272,20 @@
           <div class="result-card"><div class="rc-label">Real Value (inflation-adj.)</div><div class="rc-value rc-contrib" id="res-real">—</div></div>
           <div class="result-card"><div class="rc-label">Interest Earned</div><div class="rc-value rc-interest" id="res-interest">—</div></div>
         </div>
+        <!-- Year by year table -->
         <div class="breakdown-section" id="breakdown-section">
           <div class="breakdown-title">Year by Year Breakdown</div>
           <table class="breakdown-table">
             <thead><tr><th>Year</th><th>Balance</th><th>Real Balance</th><th>Total Contributed</th><th>Interest Earned</th></tr></thead>
             <tbody id="breakdown-body"></tbody>
           </table>
+        </div>
+        <!-- Chart -->
+        <div class="chart-section" id="chart-section">
+          <div class="breakdown-title" style="margin-bottom:16px;">Balance Over Time</div>
+          <div class="chart-wrap">
+            <canvas id="sim-chart"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -318,6 +333,7 @@
   let token = null;
   let lastSimData = null;
   let currentUser = null;
+  let simChart = null;
 
   // ── Password toggle ──
   function togglePw(inputId, btn) {
@@ -329,15 +345,11 @@
       : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
   }
 
-  // ── User menu dropdown ──
+  // ── User menu ──
   function toggleUserMenu() {
-    const btn = document.getElementById('user-menu-btn');
-    const dropdown = document.getElementById('user-dropdown');
-    btn.classList.toggle('open');
-    dropdown.classList.toggle('open');
+    document.getElementById('user-menu-btn').classList.toggle('open');
+    document.getElementById('user-dropdown').classList.toggle('open');
   }
-
-  // Close dropdown when clicking outside
   document.addEventListener('click', e => {
     const wrap = document.querySelector('.user-menu-wrap');
     if (wrap && !wrap.contains(e.target)) {
@@ -451,16 +463,125 @@
   // ── Logout ──
   function doLogout() {
     token = null; lastSimData = null; currentUser = null;
+    if (simChart) { simChart.destroy(); simChart = null; }
     document.getElementById('dashboard-screen').style.display = 'none';
     document.getElementById('auth-screen').style.display      = 'flex';
     document.getElementById('results-row').classList.remove('visible');
     document.getElementById('breakdown-section').classList.remove('visible');
+    document.getElementById('chart-section').classList.remove('visible');
     document.getElementById('save-btn').classList.remove('visible');
     document.getElementById('login-email').value = '';
     document.getElementById('login-password').value = '';
     document.getElementById('user-dropdown').classList.remove('open');
     document.getElementById('user-menu-btn').classList.remove('open');
     toast('Logged out', 'ok');
+  }
+
+  // ── Render chart ──
+  function renderChart(breakdown) {
+    const labels  = breakdown.map(r => `Year ${r.year}`);
+    const nominal = breakdown.map(r => r.balance);
+    const real    = breakdown.map(r => r.real_balance);
+    const contrib = breakdown.map(r => r.total_contributions);
+
+    if (simChart) { simChart.destroy(); simChart = null; }
+
+    const ctx = document.getElementById('sim-chart').getContext('2d');
+
+    simChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Nominal Balance',
+            data: nominal,
+            borderColor: '#3ecf8e',
+            backgroundColor: 'rgba(62,207,142,0.08)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#3ecf8e',
+          },
+          {
+            label: 'Real Balance (inflation-adj.)',
+            data: real,
+            borderColor: '#4f8ef7',
+            backgroundColor: 'rgba(79,142,247,0.06)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#4f8ef7',
+            borderDash: [5, 4],
+          },
+          {
+            label: 'Total Contributions',
+            data: contrib,
+            borderColor: '#f4c55a',
+            backgroundColor: 'rgba(244,197,90,0.05)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#f4c55a',
+            borderDash: [3, 3],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              color: '#888',
+              font: { family: 'Inter', size: 11 },
+              boxWidth: 12,
+              padding: 16,
+              usePointStyle: true,
+              pointStyle: 'line',
+            },
+          },
+          tooltip: {
+            backgroundColor: '#1e1e1e',
+            borderColor: '#2a2a2a',
+            borderWidth: 1,
+            titleColor: '#f0f0f0',
+            bodyColor: '#888',
+            titleFont: { family: 'Inter', size: 12, weight: '600' },
+            bodyFont: { family: 'Inter', size: 11 },
+            padding: 12,
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}: £${Number(ctx.parsed.y).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.03)' },
+            ticks: { color: '#555', font: { family: 'Inter', size: 11 }, maxTicksLimit: 10 },
+            border: { color: '#2a2a2a' },
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.03)' },
+            ticks: {
+              color: '#555',
+              font: { family: 'Inter', size: 11 },
+              callback: v => '£' + Number(v).toLocaleString('en-GB', { notation: 'compact', maximumFractionDigits: 1 }),
+            },
+            border: { color: '#2a2a2a' },
+          },
+        },
+      },
+    });
   }
 
   // ── Simulate ──
@@ -488,6 +609,8 @@
         document.getElementById('res-real').textContent     = fmt(data.real_final_value);
         document.getElementById('res-interest').textContent = fmt(data.interest_earned);
         document.getElementById('results-row').classList.add('visible');
+
+        // Table
         const tbody = document.getElementById('breakdown-body');
         tbody.innerHTML = '';
         data.yearly_breakdown.forEach(row => {
@@ -500,6 +623,11 @@
           </tr>`;
         });
         document.getElementById('breakdown-section').classList.add('visible');
+
+        // Chart
+        renderChart(data.yearly_breakdown);
+        document.getElementById('chart-section').classList.add('visible');
+
         document.getElementById('save-btn').classList.add('visible');
         toast('Simulation complete!', 'ok');
       } else toast(data.detail || 'Simulation failed', 'err');
