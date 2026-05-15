@@ -7,6 +7,63 @@ API-driven system for analysing savings behaviour and simulating investment stra
 
 Want 1 section for savings calculations and 1 section for investment simulation
 
+### Savings Sim
+Proposed page for managing savings, planning out your regular costs every month
+
+--> BUDGETING (Idea 1)
+    - Monthly income and expense tracker
+      - Fixed and variable costs, remaining amount calculated automatically
+      - Savings rate shown vs recommended 20% rule
+    - Leftover money pre-fills the simulator form
+    - What-if scenarios — "what if I cut food budget by £100, how does that affect my goal?"
+
+--> GOAL-BASED PLANNING (Idea 2)
+    - Goal selector (house deposit, retirement, emergency fund, custom)
+    - Recommendations based on selected goal
+      - Suggested monthly amount and time horizon to hit target
+    - Goal progress tracker
+
+--> COMBINED FLOW (Idea 1 + 2)
+    - Budget → Pick a goal → Simulate → Hand off surplus to investment page
+    - System recommends savings split based on budget and goal
+    - Auto-populates simulator with the result
+
+
+### Investment Sim
+
+--> WHAT IT DOES
+    - Search and view real market data for stocks, ETFs, crypto and indexes
+    - Simulate investing a fixed amount monthly into any asset
+    - See projected outcomes based on historical performance
+    - Get personalised asset recommendations based on your risk profile
+      (carried over from your savings profile)
+
+--> SIMULATIONS
+    - Monthly investment simulator
+      - How much would £X/month into the S&P 500 be worth in 20 years?
+    - Scenario simulator
+      - Best case, worst case and most likely outcome for any investment
+      - Based on how the asset has historically behaved
+    - Portfolio builder
+      - Pick multiple assets and see how they perform together
+      - See how spreading your money reduces risk
+
+--> AI / PREDICTIONS
+    - Short term trend forecasting using machine learning
+      - Not a "buy this stock" signal
+      - More of a "this asset has been trending up/down" indicator
+    - Clearly labelled as experimental and not financial advice
+
+--> PORTFOLIO TRACKER
+    - Log what you actually own
+    - Track how your investments are performing over time
+    - Compare your portfolio against a benchmark like the S&P 500
+
+--> DISCLAIMER
+    - All simulations are based on historical data
+    - Nothing on this platform is financial advice
+    - Past performance does not guarantee future results
+
 ## Architecture
 Streamlit → FastAPI → PostgreSQL → ML & Simulation
 
