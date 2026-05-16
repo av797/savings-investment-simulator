@@ -8,13 +8,12 @@ from backend.db import models
 from backend.schemas import SimulationOut, SimulationSummary, DashboardOut, GoalDashboardItem, GoalOut
 from backend.dependencies import get_current_user
 from backend.simulations.montecarlo import run_monte_carlo
+from backend.simulations.market_data import get_historical_returns
 
 router = APIRouter(tags=["Simulations"])
 
 
-# =============================================================================
-# Run a simulation for a goal
-# =============================================================================
+# ── Run a simulation ──
 
 @router.post("/goals/{goal_id}/simulate", response_model=SimulationOut, status_code=status.HTTP_201_CREATED)
 def simulate_goal(
@@ -22,11 +21,6 @@ def simulate_goal(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Run a Monte Carlo simulation for a goal using its current splits.
-    Stores the result and yearly breakdown in the DB.
-    The goal must have splits set before simulating.
-    """
     goal = _get_goal_or_404(db, goal_id, user_id)
 
     splits = (
@@ -49,6 +43,9 @@ def simulate_goal(
         for s in splits
     }
 
+    historical = get_historical_returns(db)
+    historical_returns = historical if historical else None
+
     result = run_monte_carlo(
         starting_balance=float(goal.current_balance),
         monthly_contribution=float(goal.monthly_allocation),
@@ -56,6 +53,7 @@ def simulate_goal(
         inflation_rate=float(goal.inflation_rate),
         target_amount=float(goal.target_amount),
         splits=splits_dict,
+        historical_returns=historical_returns,
     )
 
     snapshot_splits = json.dumps([
@@ -63,7 +61,6 @@ def simulate_goal(
         for s in splits
     ])
 
-    # Save simulation row
     sim = models.Simulation(
         goal_id=goal_id,
         scenario_count=result["scenario_count"],
@@ -97,9 +94,7 @@ def simulate_goal(
     return sim
 
 
-# =============================================================================
-# Simulation history for a goal
-# =============================================================================
+# ── Simulation history ──
 
 @router.get("/goals/{goal_id}/simulations", response_model=List[SimulationSummary])
 def get_simulation_history(
@@ -107,10 +102,7 @@ def get_simulation_history(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Return all simulation runs for a goal, newest first.
-    Returns summaries only (no yearly breakdown) for performance.
-    """
+
     _get_goal_or_404(db, goal_id, user_id)
 
     return (
@@ -127,10 +119,7 @@ def get_simulation(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Return a single simulation with its full yearly breakdown.
-    Used when rendering the fan chart for a specific historical run.
-    """
+    
     sim = db.query(models.Simulation).filter(models.Simulation.id == simulation_id).first()
     if not sim:
         raise HTTPException(status_code=404, detail="Simulation not found")
@@ -139,19 +128,14 @@ def get_simulation(
     return sim
 
 
-# =============================================================================
-# Dashboard
-# =============================================================================
+# ── Dashboard ──
 
 @router.get("/dashboard", response_model=DashboardOut)
 def get_dashboard(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Returns all goals for the user with their latest simulation each,
-    plus combined summary stats across all goals.
-    """
+    
     goals = (
         db.query(models.Goal)
         .filter(models.Goal.user_id == user_id)
@@ -176,22 +160,22 @@ def get_dashboard(
             .first()
         )
 
-        target = float(goal.target_amount)
-        balance = float(goal.current_balance)
+        target     = float(goal.target_amount)
+        balance    = float(goal.current_balance)
         allocation = float(goal.monthly_allocation)
 
         progress_pct = round((balance / target * 100), 2) if target > 0 else 0.0
 
         total_monthly += allocation
-        total_target += target
+        total_target  += target
         total_balance += balance
 
         if latest_sim:
-            weighted_success += float(latest_sim.success_rate) * allocation
+            weighted_success          += float(latest_sim.success_rate) * allocation
             total_allocation_with_sim += allocation
 
             if weakest_success is None or float(latest_sim.success_rate) < weakest_success:
-                weakest_success = latest_sim.success_rate
+                weakest_success = float(latest_sim.success_rate)
                 weakest_goal_id = goal.id
 
         goal_items.append(
@@ -216,9 +200,7 @@ def get_dashboard(
     )
 
 
-# =============================================================================
-# Helper
-# =============================================================================
+# ── Helper ──
 
 def _get_goal_or_404(db: Session, goal_id: int, user_id: int) -> models.Goal:
     goal = (
