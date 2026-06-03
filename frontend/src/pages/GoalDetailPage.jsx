@@ -4,34 +4,59 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts'
 import {
-  getGoal, setSplits, runSimulation, getSimulationHistory, deleteGoal, updateGoal
+  getGoal, setSplits, runSimulation, getSimulationHistory, deleteGoal
 } from '../api'
+import api from '../api/client'
 
 const fmt = (n) => new Intl.NumberFormat('en-GB', {
   style: 'currency', currency: 'GBP', maximumFractionDigits: 0
 }).format(n)
 
 const ASSET_CLASSES = [
-  { value: 'stocks', label: 'Stocks',  desc: 'S&P 500 — high risk, high return',      color: 'bg-blue-400' },
-  { value: 'etfs',   label: 'ETFs',    desc: 'FTSE All-World — diversified, moderate', color: 'bg-purple-400' },
-  { value: 'bonds',  label: 'Bonds',   desc: 'UK Gilts — low risk, steady return',    color: 'bg-yellow-400' },
-  { value: 'cash',   label: 'Cash',    desc: 'UK savings rate — very low risk',        color: 'bg-gray-400' },
+  { value: 'stocks', label: 'Stocks',  desc: 'S&P 500 — high risk, high return',       color: 'bg-blue-400' },
+  { value: 'etfs',   label: 'ETFs',    desc: 'FTSE All-World — diversified, moderate',  color: 'bg-purple-400' },
+  { value: 'bonds',  label: 'Bonds',   desc: 'UK Gilts — low risk, steady return',      color: 'bg-yellow-400' },
+  { value: 'cash',   label: 'Cash',    desc: 'UK savings rate — very low risk',         color: 'bg-gray-400' },
 ]
 
 function SplitEditor({ goalId, initialSplits, onSaved }) {
   const [splits, setSplitsState] = useState(
     initialSplits.length > 0
       ? initialSplits.reduce((acc, s) => ({ ...acc, [s.asset_class]: s.percentage }), {})
-      : { stocks: 60, bonds: 20, cash: 20 }
+      : { stocks: 60, bonds: 20, cash: 20, etfs: 0 }
   )
-  const [saving, setSaving] = useState(false)
-  const [error, setError]   = useState('')
+  const [saving, setSaving]         = useState(false)
+  const [suggesting, setSuggesting] = useState(false)
+  const [suggestion, setSuggestion] = useState(null)
+  const [error, setError]           = useState('')
 
   const total = Object.values(splits).reduce((a, b) => a + Number(b), 0)
 
   const handleChange = (asset, value) => {
     setSplitsState({ ...splits, [asset]: Number(value) })
     setError('')
+    setSuggestion(null)
+  }
+
+  const handleSuggest = async () => {
+    setSuggesting(true)
+    setError('')
+    try {
+      const res = await api.post(`/goals/${goalId}/suggest-split`)
+      const { splits: suggested, profile, reasoning } = res.data
+      // Apply suggested splits to sliders
+      setSplitsState({
+        stocks: suggested.stocks || 0,
+        etfs:   suggested.etfs   || 0,
+        bonds:  suggested.bonds  || 0,
+        cash:   suggested.cash   || 0,
+      })
+      setSuggestion({ profile, reasoning })
+    } catch (err) {
+      setError('Could not get suggestion')
+    } finally {
+      setSuggesting(false)
+    }
   }
 
   const handleSave = async () => {
@@ -39,13 +64,11 @@ function SplitEditor({ goalId, initialSplits, onSaved }) {
       setError(`Percentages must sum to 100. Currently: ${total}%`)
       return
     }
-
     setSaving(true)
     try {
       const splitsArray = Object.entries(splits)
         .filter(([, pct]) => pct > 0)
         .map(([asset_class, percentage]) => ({ asset_class, percentage }))
-
       await setSplits(goalId, splitsArray)
       onSaved()
     } catch (err) {
@@ -55,11 +78,42 @@ function SplitEditor({ goalId, initialSplits, onSaved }) {
     }
   }
 
+  const profileLabels = {
+    very_conservative: 'Very Conservative',
+    conservative:      'Conservative',
+    moderate:          'Moderate',
+    growth:            'Growth',
+    aggressive:        'Aggressive',
+  }
+
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-      <h3 className="font-semibold text-white mb-1">Asset allocation</h3>
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="font-semibold text-white">Asset allocation</h3>
+        <button
+          onClick={handleSuggest}
+          disabled={suggesting}
+          className="text-xs bg-emerald-400/10 hover:bg-emerald-400/20 border border-emerald-400/30 text-emerald-400 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+        >
+          {suggesting ? 'Thinking...' : '✨ AI suggestion'}
+        </button>
+      </div>
       <p className="text-sm text-gray-500 mb-5">How to invest each month toward this goal</p>
 
+      {/* AI suggestion banner */}
+      {suggestion && (
+        <div className="mb-4 bg-emerald-400/10 border border-emerald-400/20 rounded-xl p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wide">
+              {profileLabels[suggestion.profile]} profile
+            </span>
+          </div>
+          <p className="text-xs text-gray-400">{suggestion.reasoning}</p>
+          <p className="text-xs text-gray-500 mt-1">Sliders updated — adjust if needed, then save.</p>
+        </div>
+      )}
+
+      {/* Sliders */}
       <div className="space-y-4">
         {ASSET_CLASSES.map((asset) => (
           <div key={asset.value}>
@@ -162,9 +216,9 @@ function FanChart({ breakdown, target }) {
         <YAxis tickFormatter={(v) => `£${(v/1000).toFixed(0)}k`} tick={{ fill: '#6b7280', fontSize: 12 }} />
         <Tooltip content={<CustomTooltip />} />
         <ReferenceLine y={target} stroke="#fbbf24" strokeDasharray="4 4" label={{ value: 'Target', fill: '#fbbf24', fontSize: 11 }} />
-        <Area type="monotone" dataKey="p90"  name="Best 10%"   stroke="#34d399" fill="url(#p90grad)" strokeWidth={1.5} />
-        <Area type="monotone" dataKey="median" name="Median"   stroke="#60a5fa" fill="none" strokeWidth={2} />
-        <Area type="monotone" dataKey="p10"  name="Worst 10%"  stroke="#f87171" fill="url(#p10grad)" strokeWidth={1.5} />
+        <Area type="monotone" dataKey="p90"          name="Best 10%"      stroke="#34d399" fill="url(#p90grad)" strokeWidth={1.5} />
+        <Area type="monotone" dataKey="median"       name="Median"        stroke="#60a5fa" fill="none"          strokeWidth={2} />
+        <Area type="monotone" dataKey="p10"          name="Worst 10%"     stroke="#f87171" fill="url(#p10grad)" strokeWidth={1.5} />
         <Area type="monotone" dataKey="contributions" name="Contributions" stroke="#6b7280" fill="none" strokeDasharray="3 3" strokeWidth={1} />
       </AreaChart>
     </ResponsiveContainer>
@@ -174,13 +228,13 @@ function FanChart({ breakdown, target }) {
 export default function GoalDetailPage() {
   const { id }    = useParams()
   const navigate  = useNavigate()
-  const [goal, setGoal]           = useState(null)
-  const [simHistory, setSimHistory] = useState([])
-  const [latestSim, setLatestSim] = useState(null)
-  const [loading, setLoading]     = useState(true)
-  const [simLoading, setSimLoading] = useState(false)
-  const [deleting, setDeleting]   = useState(false)
-  const [error, setError]         = useState('')
+  const [goal, setGoal]               = useState(null)
+  const [simHistory, setSimHistory]   = useState([])
+  const [latestSim, setLatestSim]     = useState(null)
+  const [loading, setLoading]         = useState(true)
+  const [simLoading, setSimLoading]   = useState(false)
+  const [deleting, setDeleting]       = useState(false)
+  const [error, setError]             = useState('')
 
   const load = async () => {
     try {
@@ -206,7 +260,9 @@ export default function GoalDetailPage() {
     try {
       const res = await runSimulation(id)
       setLatestSim(res.data)
-      await load()
+      
+      const histRes = await getSimulationHistory(id)
+      setSimHistory(histRes.data)
     } catch (err) {
       setError(err.response?.data?.detail || 'Simulation failed')
     } finally {
@@ -273,16 +329,16 @@ export default function GoalDetailPage() {
         {/* Left column */}
         <div className="space-y-6">
 
-          {/* Stats */}
+          {/* Goal summary */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
             <h3 className="font-semibold text-white mb-4">Goal summary</h3>
             <div className="space-y-3">
               {[
-                { label: 'Target',      value: fmt(goal.target_amount) },
+                { label: 'Target',       value: fmt(goal.target_amount) },
                 { label: 'Saved so far', value: fmt(goal.current_balance) },
-                { label: 'Monthly',     value: fmt(goal.monthly_allocation) },
-                { label: 'Timeline',    value: `${goal.years} years` },
-                { label: 'Inflation',   value: `${(goal.inflation_rate * 100).toFixed(1)}%` },
+                { label: 'Monthly',      value: fmt(goal.monthly_allocation) },
+                { label: 'Timeline',     value: `${goal.years} years` },
+                { label: 'Inflation',    value: `${(goal.inflation_rate * 100).toFixed(1)}%` },
               ].map((row) => (
                 <div key={row.label} className="flex justify-between">
                   <span className="text-gray-500 text-sm">{row.label}</span>
@@ -306,7 +362,7 @@ export default function GoalDetailPage() {
             </div>
           </div>
 
-          {/* Split editor */}
+          {/* Split editor with AI suggestion */}
           <SplitEditor
             goalId={id}
             initialSplits={goal.splits || []}
@@ -315,10 +371,10 @@ export default function GoalDetailPage() {
 
         </div>
 
-        {/* Right column — simulation */}
+        {/* Right column */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* Simulate button + results */}
+          {/* Simulation panel */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -327,14 +383,14 @@ export default function GoalDetailPage() {
               </div>
               <button
                 onClick={handleSimulate}
-                disabled={simLoading || goal.splits?.length === 0}
+                disabled={simLoading || !goal.splits?.length}
                 className="bg-emerald-400 hover:bg-emerald-300 disabled:opacity-40 text-gray-950 font-semibold px-5 py-2 rounded-xl transition-colors text-sm"
               >
                 {simLoading ? 'Running...' : 'Run simulation'}
               </button>
             </div>
 
-            {goal.splits?.length === 0 && (
+            {!goal.splits?.length && (
               <div className="text-center py-8 text-gray-500 text-sm">
                 Set your asset allocation first, then run a simulation
               </div>
@@ -342,13 +398,12 @@ export default function GoalDetailPage() {
 
             {latestSim && (
               <>
-                {/* Key metrics */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                   {[
-                    { label: 'Success rate',   value: `${latestSim.success_rate}%`,         color: successColor },
-                    { label: 'Median outcome', value: fmt(latestSim.median_outcome),         color: 'text-white' },
-                    { label: 'Worst 10%',      value: fmt(latestSim.worst_10pct),            color: 'text-red-400' },
-                    { label: 'Best 10%',       value: fmt(latestSim.best_10pct),             color: 'text-emerald-400' },
+                    { label: 'Success rate',   value: `${latestSim.success_rate}%`,  color: successColor },
+                    { label: 'Median outcome', value: fmt(latestSim.median_outcome), color: 'text-white' },
+                    { label: 'Worst 10%',      value: fmt(latestSim.worst_10pct),    color: 'text-red-400' },
+                    { label: 'Best 10%',       value: fmt(latestSim.best_10pct),     color: 'text-emerald-400' },
                   ].map((m) => (
                     <div key={m.label} className="bg-gray-800/50 rounded-xl p-3">
                       <div className="text-xs text-gray-500 mb-1">{m.label}</div>
@@ -357,7 +412,6 @@ export default function GoalDetailPage() {
                   ))}
                 </div>
 
-                {/* Fan chart */}
                 <FanChart
                   breakdown={latestSim.yearly_breakdown || []}
                   target={goal.target_amount}
@@ -380,10 +434,16 @@ export default function GoalDetailPage() {
                 {simHistory.map((sim) => (
                   <div key={sim.id} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
                     <div className="text-sm text-gray-400">
-                      {new Date(sim.run_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      {new Date(sim.run_at).toLocaleDateString('en-GB', {
+                        day: 'numeric', month: 'short', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                      })}
                     </div>
                     <div className="flex items-center gap-4 text-sm">
-                      <span className={sim.success_rate >= 75 ? 'text-emerald-400' : sim.success_rate >= 50 ? 'text-yellow-400' : 'text-red-400'}>
+                      <span className={
+                        sim.success_rate >= 75 ? 'text-emerald-400' :
+                        sim.success_rate >= 50 ? 'text-yellow-400' : 'text-red-400'
+                      }>
                         {sim.success_rate}% success
                       </span>
                       <span className="text-gray-500">{fmt(sim.median_outcome)} median</span>

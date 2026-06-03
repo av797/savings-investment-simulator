@@ -38,6 +38,9 @@ export const getSplits = (goalId) =>
 export const setSplits = (goalId, splits) =>
   api.put(`/goals/${goalId}/splits`, { splits })
 
+export const suggestSplit = (goalId) =>
+  api.post(`/goals/${goalId}/suggest-split`)
+
 
 // ── Simulations ──
 
