@@ -1,0 +1,21 @@
+<svg width="200" height="240" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- "Goal" text -->
+  <text x="100" y="50" text-anchor="middle" fill="#1e3a8a" font-size="36" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Goal</text>
+
+  <!-- Letter I -->
+  <rect x="40" y="80" width="20" height="80" fill="#1e3a8a" rx="2"/>
+
+  <!-- Letter Q - circle -->
+  <circle cx="130" cy="120" r="35" stroke="#1e3a8a" stroke-width="20" fill="none"/>
+
+  <!-- Q tail that transforms into upward trend line -->
+  <path d="M 150 140 L 165 155 L 175 145 L 185 135 L 195 125" stroke="#14b8a6" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Arrow head -->
+  <path d="M 195 125 L 190 132 M 195 125 L 188 130" stroke="#14b8a6" stroke-width="8" stroke-linecap="round" fill="none"/>
+
+  <!-- Small data points on trend line -->
+  <circle cx="165" cy="155" r="4" fill="#14b8a6"/>
+  <circle cx="175" cy="145" r="4" fill="#14b8a6"/>
+  <circle cx="185" cy="135" r="4" fill="#14b8a6"/>
+</svg>
