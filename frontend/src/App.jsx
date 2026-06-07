@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage'
 import GoalDetailPage from './pages/GoalDetailPage'
 import NewGoalPage from './pages/NewGoalPage'
 import ReportPage from './pages/ReportPage'
+import SettingsPage from './pages/SettingsPage'
 import Navbar from './components/Navbar'
 
 function ProtectedRoute({ children }) {
@@ -26,28 +27,19 @@ function AppRoutes() {
       <Routes>
         <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
         <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Navbar />
-            <DashboardPage />
-          </ProtectedRoute>
+          <ProtectedRoute><Navbar /><DashboardPage /></ProtectedRoute>
         } />
         <Route path="/goals/new" element={
-          <ProtectedRoute>
-            <Navbar />
-            <NewGoalPage />
-          </ProtectedRoute>
+          <ProtectedRoute><Navbar /><NewGoalPage /></ProtectedRoute>
         } />
         <Route path="/goals/:id" element={
-          <ProtectedRoute>
-            <Navbar />
-            <GoalDetailPage />
-          </ProtectedRoute>
+          <ProtectedRoute><Navbar /><GoalDetailPage /></ProtectedRoute>
         } />
         <Route path="/report" element={
-          <ProtectedRoute>
-            <Navbar />
-            <ReportPage />
-          </ProtectedRoute>
+          <ProtectedRoute><Navbar /><ReportPage /></ProtectedRoute>
+        } />
+        <Route path="/settings" element={
+          <ProtectedRoute><Navbar /><SettingsPage /></ProtectedRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>

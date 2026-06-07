@@ -13,7 +13,7 @@ from backend.dependencies import get_current_user
 router = APIRouter(prefix="/goals", tags=["Goals"])
 
 
-# ── Goals CRUD ──
+#Goals CRUD
 
 @router.post("", response_model=GoalOut, status_code=status.HTTP_201_CREATED)
 def create_goal(
@@ -21,7 +21,27 @@ def create_goal(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    if user.monthly_income and data.monthly_allocation > float(user.monthly_income):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Monthly allocation (£{data.monthly_allocation:,.0f}) cannot exceed your monthly income (£{float(user.monthly_income):,.0f})"
+        )
+
+    existing_goals = db.query(models.Goal).filter(
+        models.Goal.user_id == user_id,
+        models.Goal.status == "active"
+    ).all()
+    total_allocated = sum(float(g.monthly_allocation) for g in existing_goals)
+
+    if user.monthly_income and (total_allocated + data.monthly_allocation) > float(user.monthly_income):
+        remaining = float(user.monthly_income) - total_allocated
+        raise HTTPException(
+            status_code=400,
+            detail=f"Total allocations would exceed your monthly income. You have £{remaining:,.0f} remaining to allocate."
+        )
+
     goal = models.Goal(
         user_id=user_id,
         name=data.name,
@@ -35,6 +55,7 @@ def create_goal(
     )
     db.add(goal)
     db.flush()
+
     if data.splits:
         _replace_splits(db, goal.id, data.splits)
 
@@ -74,9 +95,28 @@ def update_goal(
     db: Session = Depends(get_db),
 ):
     goal = _get_goal_or_404(db, goal_id, user_id)
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    
+    if data.monthly_allocation is not None and user.monthly_income:
+        other_goals = db.query(models.Goal).filter(
+            models.Goal.user_id == user_id,
+            models.Goal.status == "active",
+            models.Goal.id != goal_id,
+        ).all()
+        total_other = sum(float(g.monthly_allocation) for g in other_goals)
+
+        if (total_other + data.monthly_allocation) > float(user.monthly_income):
+            remaining = float(user.monthly_income) - total_other
+            raise HTTPException(
+                status_code=400,
+                detail=f"Monthly allocation would exceed your income. You have £{remaining:,.0f} available."
+            )
+
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(goal, field, value)
+
     db.commit()
     db.refresh(goal)
     return goal
@@ -93,7 +133,7 @@ def delete_goal(
     db.commit()
 
 
-# ── Splits ──
+#Splits
 
 @router.put("/{goal_id}/splits", response_model=List[GoalSplitOut])
 def set_splits(
@@ -122,7 +162,7 @@ def get_splits(
     )
 
 
-# ── ML split suggestion ──
+#ML split suggestion
 
 @router.post("/{goal_id}/suggest-split")
 def suggest_split(
@@ -130,19 +170,13 @@ def suggest_split(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Use the ML model to suggest an asset allocation for this goal.
-    Model is trained on market-data-derived labels — finds the
-    historically optimal split for this goal/profile combination
-    using 30 years of real market returns.
-    """
+    
     from backend.simulations.ml_models import suggest_split as ml_suggest
     from backend.simulations.market_data import get_historical_returns
 
     goal = _get_goal_or_404(db, goal_id, user_id)
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
-    # Pull real historical returns from DB to train/run the model
     historical_returns = get_historical_returns(db)
 
     result = ml_suggest(
@@ -158,7 +192,7 @@ def suggest_split(
     return result
 
 
-# ── Helpers ──
+#Helpers
 
 def _get_goal_or_404(db: Session, goal_id: int, user_id: int) -> models.Goal:
     goal = (

@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 
 from backend.db import models
 from backend.db.database import get_db
-from backend.schemas import UserCreate, UserOut, UserLogin
+from backend.schemas import UserCreate, UserOut, UserLogin, UserUpdate
 from backend.security import create_access_token
 from backend.dependencies import get_current_user
 
@@ -23,18 +23,16 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-# Health check
+#Health check
+
 @router.get("/health")
 def health_check(db: Session = Depends(get_db)):
     result = db.execute(text("SELECT 1")).scalar()
-    return {
-        "status": "ok",
-        "db_result": result,
-        "timestamp": datetime.now()
-    }
+    return {"status": "ok", "db_result": result, "timestamp": datetime.now()}
 
 
-# Register
+#Register
+
 @router.post("/users", status_code=201, response_model=UserOut)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
@@ -61,7 +59,8 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-# Login
+#Login
+
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(
@@ -79,7 +78,8 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# Get current user
+#Get current user
+
 @router.get("/me", response_model=UserOut)
 def get_user(user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(
@@ -90,7 +90,39 @@ def get_user(user_id: int = Depends(get_current_user), db: Session = Depends(get
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-# Soft delete current user
+
+#Update current user
+
+@router.patch("/me", response_model=UserOut)
+def update_user(
+    data: UserUpdate,
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user = db.query(models.User).filter(
+        models.User.id == user_id,
+        models.User.is_active == True
+    ).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+
+    valid_profiles = {"low", "medium", "high"}
+    if data.risk_profile and data.risk_profile not in valid_profiles:
+        raise HTTPException(
+            status_code=400,
+            detail=f"risk_profile must be one of {valid_profiles}"
+        )
+
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(user, field, value)
+
+    db.commit()
+    db.refresh(user)
+    return user
+
+
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
 

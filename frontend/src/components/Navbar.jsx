@@ -17,7 +17,6 @@ export default function Navbar() {
     <nav className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
-        {/* Logo */}
         <Link to="/dashboard" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-emerald-400 rounded-md flex items-center justify-center">
             <span className="text-gray-950 font-black text-sm">W</span>
@@ -25,7 +24,6 @@ export default function Navbar() {
           <span className="font-semibold text-white tracking-tight">WealthSim</span>
         </Link>
 
-        {/* Nav links */}
         <div className="flex items-center gap-1">
           <Link
             to="/dashboard"
@@ -49,9 +47,18 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* User + logout */}
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-400">{user?.email}</span>
+          <span className="text-sm text-gray-400 hidden md:block">{user?.email}</span>
+          <Link
+            to="/settings"
+            className={`text-sm transition-colors ${
+              isActive('/settings')
+                ? 'text-white'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Settings
+          </Link>
           <button
             onClick={handleLogout}
             className="text-sm text-gray-400 hover:text-white transition-colors"

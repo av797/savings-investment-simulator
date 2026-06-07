@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createGoal } from '../api'
+import { useAuth } from '../context/AuthContext'
 
 const GOAL_TYPES = [
-  { value: 'house',          label: 'House deposit',   icon: '🏠' },
-  { value: 'retirement',     label: 'Retirement',      icon: '👴' },
-  { value: 'emergency_fund', label: 'Emergency fund',  icon: '🛡️' },
-  { value: 'education',      label: 'Education',       icon: '🎓' },
-  { value: 'travel',         label: 'Travel',          icon: '✈️' },
-  { value: 'other',          label: 'Other',           icon: '🎯' },
+  { value: 'house',          label: 'House deposit',  icon: '🏠' },
+  { value: 'retirement',     label: 'Retirement',     icon: '👴' },
+  { value: 'emergency_fund', label: 'Emergency fund', icon: '🛡️' },
+  { value: 'education',      label: 'Education',      icon: '🎓' },
+  { value: 'travel',         label: 'Travel',         icon: '✈️' },
+  { value: 'other',          label: 'Other',          icon: '🎯' },
 ]
 
 export default function NewGoalPage() {
-  const navigate = useNavigate()
+  const navigate    = useNavigate()
+  const { user }    = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
 
@@ -32,8 +34,19 @@ export default function NewGoalPage() {
     setError('')
   }
 
+  const monthlyIncome    = user?.monthly_income ? parseFloat(user.monthly_income) : null
+  const allocationValue  = parseFloat(form.monthly_allocation) || 0
+  const exceedsIncome    = monthlyIncome && allocationValue > monthlyIncome
+  const incomeWarning    = exceedsIncome
+    ? `Monthly allocation exceeds your income of £${monthlyIncome.toLocaleString()}`
+    : null
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (exceedsIncome) {
+      setError(`Monthly allocation cannot exceed your monthly income of £${monthlyIncome.toLocaleString()}`)
+      return
+    }
     setLoading(true)
     setError('')
 
@@ -69,9 +82,30 @@ export default function NewGoalPage() {
         <p className="text-gray-400 mt-1">Define what you're saving toward</p>
       </div>
 
+      {monthlyIncome && (
+        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4 mb-6 flex items-center justify-between">
+          <span className="text-sm text-gray-400">Your monthly income</span>
+          <span className="text-white font-semibold">£{monthlyIncome.toLocaleString()}/month</span>
+        </div>
+      )}
+
+      {!monthlyIncome && (
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
+          <p className="text-yellow-400 text-sm">
+            ⚠️ You haven't set a monthly income yet.{' '}
+            <button
+              onClick={() => navigate('/settings')}
+              className="underline hover:text-yellow-300 transition-colors"
+            >
+              Add it in Settings
+            </button>{' '}
+            to enable income validation.
+          </p>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
 
-        {/* Goal type */}
         <div>
           <label className="block text-sm text-gray-400 mb-3">Goal type</label>
           <div className="grid grid-cols-3 gap-2">
@@ -93,7 +127,6 @@ export default function NewGoalPage() {
           </div>
         </div>
 
-        {/* Name */}
         <div>
           <label className="block text-sm text-gray-400 mb-1.5">Goal name</label>
           <input
@@ -107,7 +140,6 @@ export default function NewGoalPage() {
           />
         </div>
 
-        {/* Target + current balance */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1.5">Target amount (£)</label>
@@ -136,7 +168,6 @@ export default function NewGoalPage() {
           </div>
         </div>
 
-        {/* Monthly + years */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1.5">Monthly allocation (£)</label>
@@ -148,8 +179,15 @@ export default function NewGoalPage() {
               required
               min="1"
               placeholder="500"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 transition-colors"
+              className={`w-full bg-gray-800 border rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none transition-colors ${
+                exceedsIncome
+                  ? 'border-red-500 focus:border-red-400'
+                  : 'border-gray-700 focus:border-emerald-400'
+              }`}
             />
+            {incomeWarning && (
+              <p className="text-red-400 text-xs mt-1">{incomeWarning}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1.5">Time horizon (years)</label>
@@ -167,7 +205,6 @@ export default function NewGoalPage() {
           </div>
         </div>
 
-        {/* Inflation */}
         <div>
           <label className="block text-sm text-gray-400 mb-1.5">
             Inflation rate (%) <span className="text-gray-600">— 2% is typical</span>
@@ -185,9 +222,10 @@ export default function NewGoalPage() {
           />
         </div>
 
-        {/* Notes */}
         <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Notes <span className="text-gray-600">(optional)</span></label>
+          <label className="block text-sm text-gray-400 mb-1.5">
+            Notes <span className="text-gray-600">(optional)</span>
+          </label>
           <textarea
             name="notes"
             value={form.notes}
@@ -214,8 +252,8 @@ export default function NewGoalPage() {
           </button>
           <button
             type="submit"
-            disabled={loading}
-            className="flex-2 bg-emerald-400 hover:bg-emerald-300 text-gray-950 font-semibold rounded-xl px-8 py-2.5 transition-colors disabled:opacity-50"
+            disabled={loading || exceedsIncome}
+            className="flex-1 bg-emerald-400 hover:bg-emerald-300 text-gray-950 font-semibold rounded-xl px-8 py-2.5 transition-colors disabled:opacity-50"
           >
             {loading ? 'Creating...' : 'Create goal →'}
           </button>

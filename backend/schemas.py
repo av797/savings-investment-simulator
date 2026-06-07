@@ -3,7 +3,7 @@ from typing import Optional, List
 from datetime import datetime
 
 
-# ── Users ──
+#Users
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -29,8 +29,13 @@ class UserOut(BaseModel):
 
     model_config = {"from_attributes": True}
 
+class UserUpdate(BaseModel):
+    age: Optional[int] = None
+    risk_profile: Optional[str] = None
+    monthly_income: Optional[float] = None
 
-# ── Goal Splits ──
+
+#Goal Splits
 
 VALID_ASSET_CLASSES = {"cash", "bonds", "stocks", "etfs"}
 
@@ -81,7 +86,7 @@ class GoalSplitsUpdate(BaseModel):
         return v
 
 
-# ── Goals ──
+#Goals
 
 VALID_GOAL_TYPES = {"house", "retirement", "emergency_fund", "education", "travel", "other"}
 VALID_STATUSES   = {"active", "completed", "paused"}
@@ -172,7 +177,7 @@ class GoalOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ── Simulations ──
+#Simulations
 
 class SimulationYearlyBreakdownOut(BaseModel):
     year: int
@@ -215,7 +220,7 @@ class SimulationSummary(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ── Dashboard ──
+#Dashboard
 
 class GoalDashboardItem(BaseModel):
     goal: GoalOut
