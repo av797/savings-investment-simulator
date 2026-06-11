@@ -24,12 +24,22 @@ export default function AuthPage() {
     setLoading(true)
     setError('')
 
+    if (mode === 'register') {
+      if (!form.age) {
+        setError('Please enter your age to continue')
+        setLoading(false)
+        return
+      }
+      if (parseInt(form.age) < 18) {
+        setError('You must be 18 or older to create an account')
+        setLoading(false)
+        return
+      }
+    }
+
     try {
       if (mode === 'login') {
         const res  = await login(form.email, form.password)
-        const me   = await getMe()
-        loginUser(res.data.access_token, me.data)
-        // set token before getMe call
         localStorage.setItem('token', res.data.access_token)
         const meRes = await getMe()
         loginUser(res.data.access_token, meRes.data)
@@ -62,9 +72,9 @@ export default function AuthPage() {
       <div className="hidden lg:flex flex-col justify-between w-1/2 bg-gray-900 border-r border-gray-800 p-12">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-emerald-400 rounded-md flex items-center justify-center">
-            <span className="text-gray-950 font-black text-sm">W</span>
+            <span className="text-gray-950 font-black text-sm">G</span>
           </div>
-          <span className="font-semibold text-white text-lg tracking-tight">WealthSim</span>
+          <span className="font-semibold text-white text-lg tracking-tight">GoalIQ</span>
         </div>
 
         <div>
@@ -92,16 +102,14 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* Right panel — form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
 
-          {/* Logo on mobile */}
           <div className="flex items-center gap-2 mb-10 lg:hidden">
             <div className="w-8 h-8 bg-emerald-400 rounded-md flex items-center justify-center">
-              <span className="text-gray-950 font-black text-sm">W</span>
+              <span className="text-gray-950 font-black text-sm">G</span>
             </div>
-            <span className="font-semibold text-white text-lg">WealthSim</span>
+            <span className="font-semibold text-white text-lg">GoalIQ</span>
           </div>
 
           <h2 className="text-2xl font-bold text-white mb-2">
@@ -150,6 +158,9 @@ export default function AuthPage() {
                       name="age"
                       value={form.age}
                       onChange={handleChange}
+                      required
+                      min="18"
+                      max="120"
                       className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 transition-colors"
                       placeholder="28"
                     />

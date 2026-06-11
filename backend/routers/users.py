@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException, status, APIRouter
+from pydantic import field_validator
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from datetime import datetime, timezone
@@ -35,6 +36,13 @@ def health_check(db: Session = Depends(get_db)):
 
 @router.post("/users", status_code=201, response_model=UserOut)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
+
+    @field_validator("age")
+    @classmethod
+    def validate_age(cls, v):
+        if v is not None and v < 18:
+            raise ValueError("You must be 18 or older to create an account")
+        return v
 
     existing_user = db.query(models.User).filter(models.User.email == user.email).first()
 

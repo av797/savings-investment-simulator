@@ -21,7 +21,7 @@ export default function Navbar() {
           <div className="w-7 h-7 bg-emerald-400 rounded-md flex items-center justify-center">
             <span className="text-gray-950 font-black text-sm">W</span>
           </div>
-          <span className="font-semibold text-white tracking-tight">WealthSim</span>
+          <span className="font-semibold text-white tracking-tight">GoalIQ</span>
         </Link>
 
         <div className="flex items-center gap-1">

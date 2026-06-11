@@ -8,9 +8,16 @@ from datetime import datetime
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
-    age: Optional[int] = None
+    age: int
     risk_profile: Optional[str] = None
     monthly_income: Optional[float] = None
+
+    @field_validator("age")
+    @classmethod
+    def validate_age(cls, v):
+        if v is not None and v < 18:
+            raise ValueError("You must be 18 or older to create an account")
+        return v
 
 
 class UserLogin(BaseModel):

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from backend.routers import users, simulations, goals
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="WealthSim API", version="2.0.0")
+app = FastAPI(title="GoalIQ API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
