@@ -25,11 +25,11 @@ const RISK_OPTIONS = [
 ]
 
 export default function SettingsPage() {
-  const { user, loginUser } = useAuth()
-  const navigate            = useNavigate()
+  const { user, loginUser, logoutUser } = useAuth()
+  const navigate                        = useNavigate()
 
   const [form, setForm] = useState({
-    age:            user?.age?.toString()           || '',
+    age:            user?.age?.toString()            || '',
     monthly_income: user?.monthly_income?.toString() || '',
     risk_profile:   user?.risk_profile               || 'medium',
   })
@@ -37,6 +37,7 @@ export default function SettingsPage() {
   const [saving, setSaving]   = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError]     = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -65,6 +66,19 @@ export default function SettingsPage() {
       setError(err.response?.data?.detail || 'Failed to save settings')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!confirm('Are you sure you want to delete your account? This cannot be undone.')) return
+    setDeleting(true)
+    try {
+      await api.delete('/users/me')
+      logoutUser()
+      navigate('/auth')
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to delete account')
+      setDeleting(false)
     }
   }
 
@@ -207,6 +221,20 @@ export default function SettingsPage() {
           {saving ? 'Saving...' : 'Save settings'}
         </button>
       </form>
+
+      <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6 mt-6">
+        <h2 className="font-semibold text-red-400 mb-1">Danger zone</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Permanently delete your account and all associated goals and simulations. This cannot be undone.
+        </p>
+        <button
+          onClick={handleDeleteAccount}
+          disabled={deleting}
+          className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-medium rounded-xl px-4 py-2.5 text-sm transition-colors disabled:opacity-50"
+        >
+          {deleting ? 'Deleting...' : 'Delete my account'}
+        </button>
+      </div>
 
     </div>
   )

@@ -100,7 +100,6 @@ function SplitEditor({ goalId, initialSplits, onSaved }) {
       </div>
       <p className="text-sm text-gray-500 mb-5">How to invest each month toward this goal</p>
 
-      {/* AI suggestion banner */}
       {suggestion && (
         <div className="mb-4 bg-emerald-400/10 border border-emerald-400/20 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
@@ -113,7 +112,6 @@ function SplitEditor({ goalId, initialSplits, onSaved }) {
         </div>
       )}
 
-      {/* Sliders */}
       <div className="space-y-4">
         {ASSET_CLASSES.map((asset) => (
           <div key={asset.value}>
@@ -139,7 +137,6 @@ function SplitEditor({ goalId, initialSplits, onSaved }) {
         ))}
       </div>
 
-      {/* Total bar */}
       <div className="mt-5 pt-4 border-t border-gray-800">
         <div className="flex justify-between text-sm mb-2">
           <span className="text-gray-400">Total allocated</span>
@@ -301,7 +298,6 @@ export default function GoalDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
 
-      {/* Header */}
       <div className="flex items-start justify-between mb-8">
         <div>
           <button
@@ -326,10 +322,8 @@ export default function GoalDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Left column */}
         <div className="space-y-6">
 
-          {/* Goal summary */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
             <h3 className="font-semibold text-white mb-4">Goal summary</h3>
             <div className="space-y-3">
@@ -347,7 +341,6 @@ export default function GoalDetailPage() {
               ))}
             </div>
 
-            {/* Progress bar */}
             <div className="mt-4 pt-4 border-t border-gray-800">
               <div className="flex justify-between text-xs text-gray-500 mb-1.5">
                 <span>Progress</span>
@@ -362,7 +355,6 @@ export default function GoalDetailPage() {
             </div>
           </div>
 
-          {/* Split editor with AI suggestion */}
           <SplitEditor
             goalId={id}
             initialSplits={goal.splits || []}
@@ -371,10 +363,8 @@ export default function GoalDetailPage() {
 
         </div>
 
-        {/* Right column */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* Simulation panel */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -426,7 +416,6 @@ export default function GoalDetailPage() {
             )}
           </div>
 
-          {/* Simulation history */}
           {simHistory.length > 1 && (
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
               <h3 className="font-semibold text-white mb-4">Simulation history</h3>
