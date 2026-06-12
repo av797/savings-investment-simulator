@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
@@ -27,6 +27,9 @@ const RISK_OPTIONS = [
 export default function SettingsPage() {
   const { user, loginUser, logoutUser } = useAuth()
   const navigate                        = useNavigate()
+  const fileInputRef                    = useRef(null)
+
+  const displayName = user?.email?.split('@')[0] || 'Account'
 
   const [form, setForm] = useState({
     age:            user?.age?.toString()            || '',
@@ -34,15 +37,67 @@ export default function SettingsPage() {
     risk_profile:   user?.risk_profile               || 'medium',
   })
 
-  const [saving, setSaving]   = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError]     = useState('')
-  const [deleting, setDeleting] = useState(false)
+  const [avatarPreview, setAvatarPreview]     = useState(user?.avatar || null)
+  const [saving, setSaving]                   = useState(false)
+  const [success, setSuccess]                 = useState(false)
+  const [error, setError]                     = useState('')
+  const [deleting, setDeleting]               = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
     setSuccess(false)
     setError('')
+  }
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file')
+      return
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Image must be under 2MB')
+      return
+    }
+
+    setUploadingAvatar(true)
+    setError('')
+
+    const reader = new FileReader()
+    reader.onload = async (event) => {
+      const base64 = event.target.result
+      setAvatarPreview(base64)
+      try {
+        const res = await api.patch('/users/me', { avatar: base64 })
+        const token = localStorage.getItem('token')
+        loginUser(token, res.data)
+      } catch (err) {
+        setError(err.response?.data?.detail || 'Failed to upload photo')
+        setAvatarPreview(user?.avatar || null)
+      } finally {
+        setUploadingAvatar(false)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemoveAvatar = async () => {
+    setUploadingAvatar(true)
+    setError('')
+    try {
+      const res = await api.patch('/users/me', { avatar: null })
+      const token = localStorage.getItem('token')
+      loginUser(token, res.data)
+      setAvatarPreview(null)
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to remove photo')
+    } finally {
+      setUploadingAvatar(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -58,7 +113,6 @@ export default function SettingsPage() {
       if (form.risk_profile)   payload.risk_profile   = form.risk_profile
 
       const res = await api.patch('/users/me', payload)
-
       const token = localStorage.getItem('token')
       loginUser(token, res.data)
       setSuccess(true)
@@ -97,16 +151,54 @@ export default function SettingsPage() {
       </div>
 
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
-        <h2 className="font-semibold text-white mb-4">Account</h2>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-emerald-400/10 border border-emerald-400/20 rounded-full flex items-center justify-center">
-            <span className="text-emerald-400 font-bold text-lg">
-              {user?.email?.[0]?.toUpperCase()}
-            </span>
+        <h2 className="font-semibold text-white mb-5">Profile photo</h2>
+        <div className="flex items-center gap-5">
+          <div className="relative flex-shrink-0">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-emerald-400/10 border-2 border-emerald-400/20 flex items-center justify-center">
+              {avatarPreview ? (
+                <img src={avatarPreview} alt={displayName} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-emerald-400 font-bold text-2xl">
+                  {displayName[0]?.toUpperCase()}
+                </span>
+              )}
+            </div>
+            {uploadingAvatar && (
+              <div className="absolute inset-0 rounded-full bg-gray-950/60 flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
           </div>
+
           <div>
-            <div className="text-white font-medium">{user?.email}</div>
-            <div className="text-gray-500 text-sm">Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : '—'}</div>
+            <p className="text-white font-medium mb-1">{displayName}</p>
+            <p className="text-gray-500 text-sm mb-3">{user?.email}</p>
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="text-sm bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {avatarPreview ? 'Change photo' : 'Upload photo'}
+              </button>
+              {avatarPreview && (
+                <button
+                  onClick={handleRemoveAvatar}
+                  disabled={uploadingAvatar}
+                  className="text-sm text-gray-500 hover:text-red-400 transition-colors disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            <p className="text-gray-600 text-xs mt-2">JPG, PNG or GIF · Max 2MB</p>
           </div>
         </div>
       </div>

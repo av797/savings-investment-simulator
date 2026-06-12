@@ -76,7 +76,6 @@ export default function ReportPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
 
-      {/* Header */}
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-white">Financial plan report</h1>
         <p className="text-gray-400 mt-1">
@@ -84,7 +83,6 @@ export default function ReportPage() {
         </p>
       </div>
 
-      {/* Overall summary */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-8">
         <h2 className="font-semibold text-white mb-5">Overall status</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -107,7 +105,6 @@ export default function ReportPage() {
           ))}
         </div>
 
-        {/* Monthly budget breakdown */}
         <div>
           <div className="text-sm text-gray-400 mb-2">Monthly budget allocation</div>
           <div className="flex rounded-full overflow-hidden h-3">
@@ -138,7 +135,6 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Risk alert */}
       {data.weakest_goal_id && goalsWithSims.length > 0 && (() => {
         const weakest = data.goals.find((g) => g.goal.id === data.weakest_goal_id)
         if (!weakest || weakest.latest_simulation?.success_rate >= 75) return null
@@ -165,7 +161,6 @@ export default function ReportPage() {
         )
       })()}
 
-      {/* Per-goal breakdown */}
       <div className="space-y-6">
         <h2 className="font-semibold text-white">Goal breakdown</h2>
 
@@ -175,7 +170,6 @@ export default function ReportPage() {
 
           return (
             <div key={goal.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              {/* Goal header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{GOAL_ICONS[goal.goal_type] || '🎯'}</span>
@@ -194,7 +188,6 @@ export default function ReportPage() {
                 </Link>
               </div>
 
-              {/* Progress */}
               <div className="mb-4">
                 <div className="flex justify-between text-sm mb-1.5">
                   <span className="text-gray-400">Progress toward {fmt(goal.target_amount)}</span>
@@ -208,7 +201,6 @@ export default function ReportPage() {
                 </div>
               </div>
 
-              {/* Splits */}
               {goal.splits?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {goal.splits.map((s) => (
@@ -219,7 +211,6 @@ export default function ReportPage() {
                 </div>
               )}
 
-              {/* Simulation results */}
               {sim ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
@@ -249,7 +240,6 @@ export default function ReportPage() {
         })}
       </div>
 
-      {/* Disclaimer */}
       <div className="mt-10 p-5 border border-gray-800 rounded-2xl text-xs text-gray-600 leading-relaxed">
         <strong className="text-gray-500">Disclaimer:</strong> All simulations are based on historical market data
         and Monte Carlo modelling. Past performance does not guarantee future results. Nothing on this platform
