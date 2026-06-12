@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createGoal } from '../api'
 import { useAuth } from '../context/AuthContext'
+import api from '../api/client'
 
 const GOAL_TYPES = [
   { value: 'house',          label: 'House deposit',  icon: '🏠' },
@@ -12,11 +13,25 @@ const GOAL_TYPES = [
   { value: 'other',          label: 'Other',          icon: '🎯' },
 ]
 
+const COUNTRIES = [
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
+  { code: 'US', name: 'United States',  flag: '🇺🇸' },
+  { code: 'EU', name: 'Euro Area',      flag: '🇪🇺' },
+  { code: 'CA', name: 'Canada',         flag: '🇨🇦' },
+  { code: 'AU', name: 'Australia',      flag: '🇦🇺' },
+  { code: 'IN', name: 'India',          flag: '🇮🇳' },
+  { code: 'JP', name: 'Japan',          flag: '🇯🇵' },
+  { code: 'SG', name: 'Singapore',      flag: '🇸🇬' },
+]
+
 export default function NewGoalPage() {
   const navigate    = useNavigate()
   const { user }    = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [loading, setLoading]           = useState(false)
+  const [error, setError]               = useState('')
+  const [selectedCountry, setSelectedCountry] = useState('GB')
+  const [inflationData, setInflationData]     = useState(null)
+  const [inflationLoading, setInflationLoading] = useState(false)
 
   const [form, setForm] = useState({
     name:               '',
@@ -28,6 +43,26 @@ export default function NewGoalPage() {
     inflation_rate:     '2',
     notes:              '',
   })
+
+  // Fetch inflation when country changes
+  useEffect(() => {
+    const fetchInflation = async () => {
+      setInflationLoading(true)
+      try {
+        const res = await api.get(`/inflation/${selectedCountry}`)
+        const rate = res.data.inflation_rate
+        setInflationData(res.data)
+        if (rate !== null) {
+          setForm((prev) => ({ ...prev, inflation_rate: rate.toFixed(1) }))
+        }
+      } catch {
+        setInflationData(null)
+      } finally {
+        setInflationLoading(false)
+      }
+    }
+    fetchInflation()
+  }, [selectedCountry])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -205,21 +240,52 @@ export default function NewGoalPage() {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm text-gray-400 mb-1.5">
-            Inflation rate (%) <span className="text-gray-600">— 2% is typical</span>
-          </label>
-          <input
-            type="number"
-            name="inflation_rate"
-            value={form.inflation_rate}
-            onChange={handleChange}
-            min="0"
-            max="20"
-            step="0.1"
-            placeholder="2"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 transition-colors"
-          />
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+          <label className="block text-sm text-gray-400">Inflation rate</label>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-400 transition-colors"
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.flag} {c.name}
+                </option>
+              ))}
+            </select>
+
+            {inflationLoading ? (
+              <span className="text-xs text-gray-500 flex items-center gap-1.5">
+                <span className="w-3 h-3 border border-gray-500 border-t-transparent rounded-full animate-spin inline-block" />
+                Fetching...
+              </span>
+            ) : inflationData?.inflation_rate != null ? (
+              <span className="text-xs bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 px-2.5 py-1 rounded-full">
+                Latest CPI: {inflationData.inflation_rate}%
+              </span>
+            ) : (
+              <span className="text-xs text-gray-600">No recent data</span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              name="inflation_rate"
+              value={form.inflation_rate}
+              onChange={handleChange}
+              min="0"
+              max="20"
+              step="0.1"
+              className="w-32 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 transition-colors"
+            />
+            <span className="text-gray-500 text-sm">% — edit to override</span>
+          </div>
+          <p className="text-gray-600 text-xs">
+            Pre-filled from latest World Bank CPI data. Adjust if needed.
+          </p>
         </div>
 
         <div>
