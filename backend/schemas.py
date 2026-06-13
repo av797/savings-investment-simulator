@@ -33,6 +33,7 @@ class UserOut(BaseModel):
     monthly_income: Optional[float] = None
     created_at: Optional[datetime] = None
     is_active: bool
+    avatar: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -40,6 +41,7 @@ class UserUpdate(BaseModel):
     age: Optional[int] = None
     risk_profile: Optional[str] = None
     monthly_income: Optional[float] = None
+    avatar: Optional[str] = None
 
 
 #Goal Splits

@@ -15,7 +15,7 @@ from sqlalchemy.sql import func
 from .database import Base
 
 
-# ── Users ──
+#Users
 
 class User(Base):
     __tablename__ = "users"
@@ -32,9 +32,10 @@ class User(Base):
 
     goals    = relationship("Goal", back_populates="user", cascade="all, delete-orphan")
     accounts = relationship("Account", back_populates="user")
+    avatar = Column(Text, nullable=True)
 
 
-# ── Accounts & Transactions ──
+#Accounts & Transactions
 
 class Account(Base):
     __tablename__ = "accounts"
@@ -63,7 +64,7 @@ class Transaction(Base):
     account = relationship("Account", back_populates="transactions")
 
 
-# ── Goals ──
+#Goals
 
 class Goal(Base):
     __tablename__ = "goals"
@@ -87,7 +88,7 @@ class Goal(Base):
     simulations = relationship("Simulation", back_populates="goal", cascade="all, delete-orphan")
 
 
-# ── Goal Splits ──
+#Goal Splits
 
 class GoalSplit(Base):
     __tablename__ = "goal_splits"
@@ -101,7 +102,7 @@ class GoalSplit(Base):
     goal = relationship("Goal", back_populates="splits")
 
 
-# ── Simulations ──
+#Simulations
 
 class Simulation(Base):
     __tablename__ = "simulations"
@@ -124,7 +125,7 @@ class Simulation(Base):
     yearly_breakdown = relationship("SimulationYearlyBreakdown", back_populates="simulation", cascade="all, delete-orphan")
 
 
-# ── Simulation Yearly Breakdown ──
+#Simulation Yearly Breakdown
 
 class SimulationYearlyBreakdown(Base):
     __tablename__ = "simulation_yearly_breakdown"
@@ -140,7 +141,7 @@ class SimulationYearlyBreakdown(Base):
     simulation = relationship("Simulation", back_populates="yearly_breakdown")
 
 
-# ── Market Returns ──
+#Market Returns
 
 class MarketReturn(Base):
     __tablename__ = "market_returns"
