@@ -7,6 +7,7 @@ import NewGoalPage from './pages/NewGoalPage'
 import ReportPage from './pages/ReportPage'
 import SettingsPage from './pages/SettingsPage'
 import Navbar from './components/Navbar'
+import MarketsPage from './pages/MarketsPage'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -40,6 +41,9 @@ function AppRoutes() {
         } />
         <Route path="/settings" element={
           <ProtectedRoute><Navbar /><SettingsPage /></ProtectedRoute>
+        } />
+        <Route path="/markets" element={
+        <ProtectedRoute><Navbar /><MarketsPage /></ProtectedRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>

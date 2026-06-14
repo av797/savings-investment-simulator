@@ -60,6 +60,16 @@ export default function Navbar() {
           >
             Report
           </Link>
+          <Link
+            to="/markets"
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isActive('/markets')
+                ? 'bg-gray-800 text-white'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+            }`}
+          >
+            Markets
+          </Link>
         </div>
 
         <div className="relative" ref={dropdownRef}>
