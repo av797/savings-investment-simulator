@@ -7,24 +7,25 @@ import AssetDetailPanel from '../components/AssetDetailPage'
 import api from '../api/client'
 
 
-const fmtPct = (n) => (n == null ? '—' : `${n > 0 ? '+' : ''}${n.toFixed(2)}%`)
-const fmtPrice = (n) => (n == null ? '—' : n.toLocaleString('en-GB', { maximumFractionDigits: 2 }))
+const fmtPct   = (n) => n == null ? '—' : `${n > 0 ? '+' : ''}${n.toFixed(2)}%`
+const fmtPrice = (n) => n == null ? '—' : n.toLocaleString('en-GB', { maximumFractionDigits: 2 })
 
 const ASSET_META = {
-  stocks: { label: 'S&P 500',          color: '#60a5fa', emoji: '📈' },
-  etfs:   { label: 'FTSE All-World',   color: '#a78bfa', emoji: '🌍' },
-  bonds:  { label: 'UK Gilts',         color: '#fbbf24', emoji: '🏦' },
-  cash:   { label: 'Cash / Savings',   color: '#9ca3af', emoji: '💰' },
+  stocks: { label: 'S&P 500',        color: '#60a5fa', emoji: '📈' },
+  etfs:   { label: 'FTSE All-World', color: '#a78bfa', emoji: '🌍' },
+  bonds:  { label: 'UK Gilts',       color: '#fbbf24', emoji: '🏦' },
+  cash:   { label: 'Cash / Savings', color: '#9ca3af', emoji: '💰' },
 }
 
 const ASSET_KEYS = ['stocks', 'etfs', 'bonds', 'cash']
 
+const TABS = ['Overview', 'News']
 
 
 function LiveStrip({ indices }) {
   if (!indices) return null
   return (
-    <div className="flex gap-6 overflow-x-auto pb-1 scrollbar-hide">
+    <div className="flex gap-6 overflow-x-auto pb-1">
       {Object.entries(indices).map(([name, data]) => (
         <div key={name} className="flex items-center gap-2 flex-shrink-0">
           <span className="text-gray-400 text-xs">{name}</span>
@@ -41,15 +42,14 @@ function LiveStrip({ indices }) {
 }
 
 function AssetCard({ assetKey, summary, live }) {
-  const meta    = ASSET_META[assetKey]
-  const data    = summary?.[assetKey]
+  const meta     = ASSET_META[assetKey]
+  const data     = summary?.[assetKey]
   const liveData = live?.assets?.[assetKey]
   if (!data) return null
-
   const changePct = liveData?.change_pct
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 h-full">
       <div className="flex items-start justify-between mb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -59,31 +59,27 @@ function AssetCard({ assetKey, summary, live }) {
           <p className="text-gray-500 text-xs">{data.description || ''}</p>
         </div>
         {changePct != null && (
-          <span className={`text-sm font-semibold px-2.5 py-1 rounded-full ${
-            changePct >= 0
-              ? 'bg-emerald-400/10 text-emerald-400'
-              : 'bg-red-400/10 text-red-400'
+          <span className={`text-sm font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${
+            changePct >= 0 ? 'bg-emerald-400/10 text-emerald-400' : 'bg-red-400/10 text-red-400'
           }`}>
             {fmtPct(changePct)} today
           </span>
         )}
       </div>
-
       {liveData?.price && (
         <div className="mb-4 pb-4 border-b border-gray-800">
           <p className="text-2xl font-bold text-white">{fmtPrice(liveData.price)}</p>
           <p className="text-gray-500 text-xs mt-0.5">Current price</p>
         </div>
       )}
-
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: 'Avg annual return', value: fmtPct(data.mean_return), color: data.mean_return >= 0 ? 'text-emerald-400' : 'text-red-400' },
-          { label: 'Volatility (std)',  value: fmtPct(data.volatility),  color: 'text-white' },
-          { label: 'Best year',         value: fmtPct(data.best_year),   color: 'text-emerald-400' },
-          { label: 'Worst year',        value: fmtPct(data.worst_year),  color: 'text-red-400' },
-          { label: 'Positive years',    value: `${data.positive_pct}%`,  color: 'text-white' },
-          { label: 'Years of data',     value: `${data.years_of_data}`,  color: 'text-white' },
+          { label: 'Avg annual return', value: fmtPct(data.mean_return),   color: data.mean_return >= 0 ? 'text-emerald-400' : 'text-red-400' },
+          { label: 'Volatility (std)',  value: fmtPct(data.volatility),    color: 'text-white' },
+          { label: 'Best year',         value: fmtPct(data.best_year),     color: 'text-emerald-400' },
+          { label: 'Worst year',        value: fmtPct(data.worst_year),    color: 'text-red-400' },
+          { label: 'Positive years',    value: `${data.positive_pct}%`,    color: 'text-white' },
+          { label: 'Years of data',     value: `${data.years_of_data}`,    color: 'text-white' },
         ].map((stat) => (
           <div key={stat.label} className="bg-gray-800/50 rounded-xl p-3">
             <p className="text-gray-500 text-xs mb-1">{stat.label}</p>
@@ -97,16 +93,13 @@ function AssetCard({ assetKey, summary, live }) {
 
 function CumulativeChart({ summary }) {
   if (!summary) return null
-
   const yearMap = {}
   ASSET_KEYS.forEach((key) => {
-    const series = summary[key]?.cumulative || []
-    series.forEach(({ year, value }) => {
+    summary[key]?.cumulative?.forEach(({ year, value }) => {
       if (!yearMap[year]) yearMap[year] = { year }
       yearMap[year][key] = value
     })
   })
-
   const data = Object.values(yearMap).sort((a, b) => a.year - b.year)
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -143,13 +136,11 @@ function CumulativeChart({ summary }) {
           <XAxis dataKey="year" tick={{ fill: '#6b7280', fontSize: 12 }} />
           <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} />
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            formatter={(value) => (
-              <span style={{ color: ASSET_META[value]?.color, fontSize: 12 }}>
-                {ASSET_META[value]?.label}
-              </span>
-            )}
-          />
+          <Legend formatter={(value) => (
+            <span style={{ color: ASSET_META[value]?.color, fontSize: 12 }}>
+              {ASSET_META[value]?.label}
+            </span>
+          )} />
           {ASSET_KEYS.map((key) => (
             <Area
               key={key}
@@ -195,18 +186,132 @@ function AnnualReturnsChart({ summary, selectedAsset }) {
           <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: '#6b7280', fontSize: 11 }} />
           <Tooltip content={<CustomTooltip />} />
           <ReferenceLine y={0} stroke="#374151" />
-          <Bar
-            dataKey="return_pct"
-            radius={[2, 2, 0, 0]}
-            fill={ASSET_META[selectedAsset]?.color}
-            label={false}
-          />
+          <Bar dataKey="return_pct" radius={[2, 2, 0, 0]} fill={ASSET_META[selectedAsset]?.color} />
         </BarChart>
       </ResponsiveContainer>
     </div>
   )
 }
 
+function NewsTab() {
+  const [news, setNews]       = useState([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter]   = useState('all')
+
+  useEffect(() => {
+    Promise.allSettled(
+      ASSET_KEYS.map((key) =>
+        api.get(`/markets/detail/${key}`).then((res) => ({
+          assetKey: key,
+          items:    res.data.news || [],
+        }))
+      )
+    ).then((results) => {
+      const merged = []
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          const { assetKey, items } = result.value
+          items.forEach((item) => {
+            if (item.title) merged.push({ ...item, assetKey })
+          })
+        }
+      })
+      const seen  = new Set()
+      const deduped = merged.filter((item) => {
+        if (seen.has(item.title)) return false
+        seen.add(item.title)
+        return true
+      })
+      setNews(deduped)
+    }).finally(() => setLoading(false))
+  }, [])
+
+  const filtered = filter === 'all' ? news : news.filter((n) => n.assetKey === filter)
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+
+  if (!news.length) return (
+    <div className="text-center py-16 text-gray-600">No news available right now</div>
+  )
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            filter === 'all'
+              ? 'bg-gray-700 text-white'
+              : 'text-gray-400 hover:text-white bg-gray-800/50'
+          }`}
+        >
+          All
+        </button>
+        {ASSET_KEYS.map((key) => (
+          <button
+            key={key}
+            onClick={() => setFilter(key)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              filter === key ? 'text-gray-950 font-semibold' : 'text-gray-400 hover:text-white bg-gray-800/50'
+            }`}
+            style={filter === key ? { backgroundColor: ASSET_META[key].color } : {}}
+          >
+            {ASSET_META[key].emoji} {ASSET_META[key].label}
+          </button>
+        ))}
+        <span className="text-gray-600 text-xs ml-auto">{filtered.length} articles</span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filtered.map((item, i) => (
+          <a
+            key={i}
+            href={item.url || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-2xl p-5 transition-all group flex flex-col gap-3"
+          >
+            {/* Asset tag */}
+            <div className="flex items-center justify-between">
+              <span
+                className="text-xs font-medium px-2.5 py-1 rounded-full"
+                style={{
+                  backgroundColor: `${ASSET_META[item.assetKey]?.color}18`,
+                  color:            ASSET_META[item.assetKey]?.color,
+                }}
+              >
+                {ASSET_META[item.assetKey]?.emoji} {ASSET_META[item.assetKey]?.label}
+              </span>
+              <svg
+                className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </div>
+
+            <p className="text-gray-200 text-sm font-medium leading-snug group-hover:text-white transition-colors">
+              {item.title}
+            </p>
+            {item.publisher && (
+              <p className="text-gray-600 text-xs mt-auto">{item.publisher}</p>
+            )}
+          </a>
+        ))}
+      </div>
+
+      {!filtered.length && (
+        <div className="text-center py-12 text-gray-600 text-sm">
+          No news for {ASSET_META[filter]?.label} right now
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function MarketsPage() {
   const [summary, setSummary]               = useState(null)
@@ -216,6 +321,7 @@ export default function MarketsPage() {
   const [error, setError]                   = useState('')
   const [selectedAsset, setSelectedAsset]   = useState('stocks')
   const [panelAsset, setPanelAsset]         = useState(null)
+  const [activeTab, setActiveTab]           = useState('Overview')
 
   useEffect(() => {
     api.get('/markets/summary')
@@ -232,14 +338,14 @@ export default function MarketsPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
 
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-white">Markets</h1>
         <p className="text-gray-400 mt-1">
           30 years of real market data — the same data that powers your simulations
         </p>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl px-6 py-4 mb-8">
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl px-6 py-4 mb-6">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">Live indices</span>
           {liveLoading && (
@@ -249,11 +355,31 @@ export default function MarketsPage() {
             </span>
           )}
         </div>
-        {live?.indices ? (
-          <LiveStrip indices={live.indices} />
-        ) : !liveLoading ? (
-          <p className="text-gray-600 text-sm">Live prices unavailable</p>
-        ) : null}
+        {live?.indices
+          ? <LiveStrip indices={live.indices} />
+          : !liveLoading
+            ? <p className="text-gray-600 text-sm">Live prices unavailable</p>
+            : null
+        }
+      </div>
+
+      <div className="flex items-center gap-1 border-b border-gray-800 mb-8">
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-5 py-2.5 text-sm font-medium transition-colors relative ${
+              activeTab === tab
+                ? 'text-white'
+                : 'text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            {tab}
+            {activeTab === tab && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-400 rounded-full" />
+            )}
+          </button>
+        ))}
       </div>
 
       {error && (
@@ -262,63 +388,63 @@ export default function MarketsPage() {
         </div>
       )}
 
-      {summaryLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-            {ASSET_KEYS.map((key) => (
-              <div
-                key={key}
-                onClick={() => setPanelAsset(key)}
-                className="cursor-pointer group"
-              >
-                <AssetCard
-                  assetKey={key}
-                  summary={summary}
-                  live={live}
-                />
-                <p className="text-center text-xs text-gray-600 group-hover:text-emerald-400 transition-colors mt-2">
-                  Click for details →
-                </p>
-              </div>
-            ))}
+      {activeTab === 'Overview' && (
+        summaryLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
           </div>
-
-          <div className="mb-8">
-            <CumulativeChart summary={summary} />
-          </div>
-
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
               {ASSET_KEYS.map((key) => (
-                <button
+                <div
                   key={key}
-                  onClick={() => setSelectedAsset(key)}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    selectedAsset === key
-                      ? 'text-gray-950 font-semibold'
-                      : 'text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800'
-                  }`}
-                  style={selectedAsset === key ? { backgroundColor: ASSET_META[key].color } : {}}
+                  onClick={() => setPanelAsset(key)}
+                  className="cursor-pointer group"
                 >
-                  {ASSET_META[key].label}
-                </button>
+                  <AssetCard assetKey={key} summary={summary} live={live} />
+                  <p className="text-center text-xs text-gray-600 group-hover:text-emerald-400 transition-colors mt-2">
+                    Click for details →
+                  </p>
+                </div>
               ))}
             </div>
-            <AnnualReturnsChart summary={summary} selectedAsset={selectedAsset} />
-          </div>
 
-          <div className="p-5 border border-gray-800 rounded-2xl text-xs text-gray-600 leading-relaxed">
-            <strong className="text-gray-500">Data sources:</strong> Annual returns sourced from Yahoo Finance
-            (^GSPC, VWRL.L, IGLT.L, ERNS.L) with Bank of England base rate backfill for cash pre-2000.
-            Live prices via Yahoo Finance. All data is for informational purposes only and does not
-            constitute financial advice.
-          </div>
-        </>
+            <div className="mb-8">
+              <CumulativeChart summary={summary} />
+            </div>
+
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4 flex-wrap">
+                {ASSET_KEYS.map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedAsset(key)}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      selectedAsset === key
+                        ? 'text-gray-950 font-semibold'
+                        : 'text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800'
+                    }`}
+                    style={selectedAsset === key ? { backgroundColor: ASSET_META[key].color } : {}}
+                  >
+                    {ASSET_META[key].label}
+                  </button>
+                ))}
+              </div>
+              <AnnualReturnsChart summary={summary} selectedAsset={selectedAsset} />
+            </div>
+
+            <div className="p-5 border border-gray-800 rounded-2xl text-xs text-gray-600 leading-relaxed">
+              <strong className="text-gray-500">Data sources:</strong> Annual returns sourced from Yahoo Finance
+              (^GSPC, VWRL.L, IGLT.L, ERNS.L) with Bank of England base rate backfill for cash pre-2000.
+              Live prices via Yahoo Finance. All data is for informational purposes only and does not
+              constitute financial advice.
+            </div>
+          </>
+        )
       )}
+
+      {activeTab === 'News' && <NewsTab />}
 
       {panelAsset && (
         <AssetDetailPanel
@@ -327,6 +453,7 @@ export default function MarketsPage() {
           onClose={() => setPanelAsset(null)}
         />
       )}
+
     </div>
   )
 }
