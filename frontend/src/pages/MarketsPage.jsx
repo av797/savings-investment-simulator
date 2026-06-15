@@ -3,9 +3,9 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend
 } from 'recharts'
+import AssetDetailPanel from '../components/AssetDetailPage'
 import api from '../api/client'
 
-// ── Helpers ──
 
 const fmtPct = (n) => (n == null ? '—' : `${n > 0 ? '+' : ''}${n.toFixed(2)}%`)
 const fmtPrice = (n) => (n == null ? '—' : n.toLocaleString('en-GB', { maximumFractionDigits: 2 }))
@@ -20,7 +20,6 @@ const ASSET_META = {
 const ASSET_KEYS = ['stocks', 'etfs', 'bonds', 'cash']
 
 
-// ── Sub-components ──
 
 function LiveStrip({ indices }) {
   if (!indices) return null
@@ -70,7 +69,6 @@ function AssetCard({ assetKey, summary, live }) {
         )}
       </div>
 
-      {/* Live price */}
       {liveData?.price && (
         <div className="mb-4 pb-4 border-b border-gray-800">
           <p className="text-2xl font-bold text-white">{fmtPrice(liveData.price)}</p>
@@ -78,7 +76,6 @@ function AssetCard({ assetKey, summary, live }) {
         </div>
       )}
 
-      {/* Historical stats grid */}
       <div className="grid grid-cols-2 gap-3">
         {[
           { label: 'Avg annual return', value: fmtPct(data.mean_return), color: data.mean_return >= 0 ? 'text-emerald-400' : 'text-red-400' },
@@ -101,7 +98,6 @@ function AssetCard({ assetKey, summary, live }) {
 function CumulativeChart({ summary }) {
   if (!summary) return null
 
-  // Merge all asset classes into one array keyed by year
   const yearMap = {}
   ASSET_KEYS.forEach((key) => {
     const series = summary[key]?.cumulative || []
@@ -203,7 +199,6 @@ function AnnualReturnsChart({ summary, selectedAsset }) {
             dataKey="return_pct"
             radius={[2, 2, 0, 0]}
             fill={ASSET_META[selectedAsset]?.color}
-            // Red for negative years
             label={false}
           />
         </BarChart>
@@ -213,15 +208,14 @@ function AnnualReturnsChart({ summary, selectedAsset }) {
 }
 
 
-// ── Main page ──
-
 export default function MarketsPage() {
-  const [summary, setSummary]           = useState(null)
-  const [live, setLive]                 = useState(null)
+  const [summary, setSummary]               = useState(null)
+  const [live, setLive]                     = useState(null)
   const [summaryLoading, setSummaryLoading] = useState(true)
-  const [liveLoading, setLiveLoading]   = useState(true)
-  const [error, setError]               = useState('')
-  const [selectedAsset, setSelectedAsset] = useState('stocks')
+  const [liveLoading, setLiveLoading]       = useState(true)
+  const [error, setError]                   = useState('')
+  const [selectedAsset, setSelectedAsset]   = useState('stocks')
+  const [panelAsset, setPanelAsset]         = useState(null)
 
   useEffect(() => {
     api.get('/markets/summary')
@@ -231,14 +225,13 @@ export default function MarketsPage() {
 
     api.get('/markets/live')
       .then((res) => setLive(res.data))
-      .catch(() => {}) // live prices are non-critical
+      .catch(() => {})
       .finally(() => setLiveLoading(false))
   }, [])
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
 
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white">Markets</h1>
         <p className="text-gray-400 mt-1">
@@ -246,7 +239,6 @@ export default function MarketsPage() {
         </p>
       </div>
 
-      {/* Live indices strip */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl px-6 py-4 mb-8">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">Live indices</span>
@@ -276,24 +268,29 @@ export default function MarketsPage() {
         </div>
       ) : (
         <>
-          {/* Asset cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
             {ASSET_KEYS.map((key) => (
-              <AssetCard
+              <div
                 key={key}
-                assetKey={key}
-                summary={summary}
-                live={live}
-              />
+                onClick={() => setPanelAsset(key)}
+                className="cursor-pointer group"
+              >
+                <AssetCard
+                  assetKey={key}
+                  summary={summary}
+                  live={live}
+                />
+                <p className="text-center text-xs text-gray-600 group-hover:text-emerald-400 transition-colors mt-2">
+                  Click for details →
+                </p>
+              </div>
             ))}
           </div>
 
-          {/* Cumulative growth chart */}
           <div className="mb-8">
             <CumulativeChart summary={summary} />
           </div>
 
-          {/* Annual returns chart with asset selector */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               {ASSET_KEYS.map((key) => (
@@ -314,7 +311,6 @@ export default function MarketsPage() {
             <AnnualReturnsChart summary={summary} selectedAsset={selectedAsset} />
           </div>
 
-          {/* Data disclaimer */}
           <div className="p-5 border border-gray-800 rounded-2xl text-xs text-gray-600 leading-relaxed">
             <strong className="text-gray-500">Data sources:</strong> Annual returns sourced from Yahoo Finance
             (^GSPC, VWRL.L, IGLT.L, ERNS.L) with Bank of England base rate backfill for cash pre-2000.
@@ -322,6 +318,14 @@ export default function MarketsPage() {
             constitute financial advice.
           </div>
         </>
+      )}
+
+      {panelAsset && (
+        <AssetDetailPanel
+          assetKey={panelAsset}
+          summaryData={summary}
+          onClose={() => setPanelAsset(null)}
+        />
       )}
     </div>
   )
