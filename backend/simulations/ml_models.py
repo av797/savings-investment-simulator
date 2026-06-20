@@ -3,9 +3,6 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from typing import Optional
 
-
-# ── Split profiles — candidate allocations the model chooses between ──
-
 SPLIT_PROFILES = {
     "very_conservative": {"cash": 70, "bonds": 20, "stocks": 5,  "etfs": 5},
     "conservative":      {"cash": 50, "bonds": 30, "stocks": 10, "etfs": 10},
@@ -29,15 +26,12 @@ RISK_PROFILE_MAP = {
     "high":   2,
 }
 
-# How much each metric matters per risk tolerance
 RISK_WEIGHTS = {
     "low":    {"success": 0.5, "worst": 0.4, "median": 0.1},
     "medium": {"success": 0.4, "worst": 0.2, "median": 0.4},
     "high":   {"success": 0.3, "worst": 0.1, "median": 0.6},
 }
 
-
-# ── Simulation helpers ──
 
 def _run_mini_simulation(
     split: dict,
@@ -198,15 +192,13 @@ def build_model(historical_returns: dict) -> RandomForestClassifier:
     return model
 
 
-# ── Lazy loading — trains on first request, not on import ──
-
 _model               = None
 _model_history_key   = None
 
 
 def _get_model(historical_returns: dict) -> RandomForestClassifier:
     global _model, _model_history_key
-    key = id(historical_returns)
+    key = sum(len(v) for v in historical_returns.values())
     if _model is None or _model_history_key != key:
         _model             = build_model(historical_returns)
         _model_history_key = key

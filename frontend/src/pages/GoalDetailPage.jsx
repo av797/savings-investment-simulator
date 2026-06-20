@@ -7,6 +7,7 @@ import {
   getGoal, setSplits, runSimulation, getSimulationHistory, deleteGoal
 } from '../api'
 import api from '../api/client'
+import GoalAnalysisCard from '../components/GoalAnalysisCard'
 
 const fmt = (n) => new Intl.NumberFormat('en-GB', {
   style: 'currency', currency: 'GBP', maximumFractionDigits: 0
@@ -442,6 +443,11 @@ export default function GoalDetailPage() {
               </div>
             </div>
           )}
+
+          <GoalAnalysisCard
+                  goalId={id}
+                  latestSimSuccessRate={latestSim?.success_rate}
+          />
 
         </div>
       </div>
