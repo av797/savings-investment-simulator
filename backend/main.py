@@ -1,6 +1,9 @@
 from fastapi import FastAPI
-from backend.routers import users, simulations, goals, inflation, markets, analysis
+from backend.routers import users, simulations, goals, inflation, markets, analysis, chat
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="GoalIQ API", version="2.0.0")
 
@@ -17,6 +20,7 @@ app.include_router(goals.router)
 app.include_router(inflation.router)
 app.include_router(markets.router)
 app.include_router(analysis.router)
+app.include_router(chat.router)
 
 @app.get("/health")
 def health_check():
