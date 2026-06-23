@@ -96,6 +96,16 @@ export default function NewGoalPage() {
         inflation_rate:     parseFloat(form.inflation_rate || 0) / 100,
         notes:              form.notes || null,
       })
+
+      if (res.data.warning) {
+        const confirmed = confirm(`⚠️ ${res.data.warning}\n\nGoal created — do you want to keep it?`)
+        if (!confirmed) {
+          await deleteGoal(res.data.id)
+          setLoading(false)
+          return
+        }
+      }
+
       navigate(`/goals/${res.data.id}`)
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to create goal')

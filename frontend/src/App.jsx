@@ -9,6 +9,7 @@ import SettingsPage from './pages/SettingsPage'
 import Navbar from './components/Navbar'
 import MarketsPage from './pages/MarketsPage'
 import ChatBot from './components/ChatBot'
+import HomePage from './pages/HomePage'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -46,7 +47,7 @@ function AppRoutes() {
         <Route path="/markets" element={
         <ProtectedRoute><Navbar /><MarketsPage /></ProtectedRoute>
         } />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<HomePage />} />
       </Routes>
       {user && <ChatBot />}
     </div>

@@ -71,7 +71,7 @@ export default function ChatBot() {
     if (open && messages.length === 0) {
       setMessages([{
         role:    'assistant',
-        content: "Hi! I'm your GoalIQ AI assistant. I can see your goals, simulations, and market data — ask me anything about your financial plan.",
+        content: "Hi! I'm your GoalIQ AI Agent. I can see your goals, simulations, and market data — ask me anything about your financial plan!",
       }])
     }
   }, [open])
@@ -125,16 +125,27 @@ export default function ChatBot() {
   return (
     <>
       {open && (
-        <div className="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-3rem)] bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
-          style={{ height: '520px' }}
+        <div
+          className="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-3rem)] bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
+          style={{ height: '540px' }}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-gray-900">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-emerald-400 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-gray-950 text-sm font-black">G</span>
+              <div className="relative flex-shrink-0">
+                <div className="w-9 h-9 bg-emerald-400 rounded-full flex items-center justify-center">
+                  <span className="text-gray-950 text-sm font-black">G</span>
+                </div>
+                <span className="absolute -bottom-1 -right-1 bg-purple-500 text-white text-[9px] font-bold px-1 rounded-full leading-4">
+                  AI
+                </span>
               </div>
               <div>
-                <p className="text-white text-sm font-semibold">GoalIQ Assistant</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-white text-sm font-semibold">GoalIQ Assistant</p>
+                  <span className="text-[10px] font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30 px-1.5 py-0.5 rounded-full">
+                    AI Agent
+                  </span>
+                </div>
                 <p className="text-emerald-400 text-xs flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block" />
                   Online · knows your goals
@@ -209,17 +220,19 @@ export default function ChatBot() {
                 </svg>
               </button>
             </div>
-            <p className="text-gray-700 text-xs mt-2 text-center">Not financial advice · Powered by GoalIQ AI</p>
+            <p className="text-gray-700 text-xs mt-2 text-center">
+              Not financial advice · GoalIQ AI Agent
+            </p>
           </div>
         </div>
       )}
 
       <button
         onClick={() => setOpen(!open)}
-        className={`fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg z-50 flex items-center justify-center transition-all ${
+        className={`fixed bottom-6 right-6 z-50 shadow-lg transition-all flex items-center gap-2 ${
           open
-            ? 'bg-gray-700 hover:bg-gray-600'
-            : 'bg-emerald-400 hover:bg-emerald-300'
+            ? 'w-14 h-14 rounded-full bg-gray-700 hover:bg-gray-600 justify-center'
+            : 'h-12 px-4 rounded-full bg-emerald-400 hover:bg-emerald-300'
         }`}
       >
         {open ? (
@@ -227,13 +240,16 @@ export default function ChatBot() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         ) : (
-          <svg className="w-6 h-6 text-gray-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
+          <>
+            <svg className="w-5 h-5 text-gray-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span className="text-gray-950 font-semibold text-sm">AI Agent</span>
+          </>
         )}
 
         {unread && !open && (
-          <span className="absolute top-0 right-0 w-3 h-3 bg-red-400 rounded-full border-2 border-gray-950" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-400 rounded-full border-2 border-gray-950" />
         )}
       </button>
     </>

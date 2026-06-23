@@ -61,6 +61,22 @@ def create_goal(
 
     db.commit()
     db.refresh(goal)
+
+    warning = None
+    if user.monthly_income:
+        all_goals = db.query(models.Goal).filter(
+            models.Goal.user_id == user_id,
+            models.Goal.status == "active"
+        ).all()
+        total = sum(float(g.monthly_allocation) for g in all_goals)
+        pct   = (total / float(user.monthly_income)) * 100
+        if pct > 50:
+            goal.warning = (
+                f"Heads up — your goals now use {pct:.0f}% of your monthly income "
+                f"(£{total:,.0f}/month of £{float(user.monthly_income):,.0f}). "
+                f"Make sure you have enough left for living costs."
+            )
+
     return goal
 
 

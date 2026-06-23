@@ -182,6 +182,7 @@ class GoalOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     splits: List[GoalSplitOut] = []          
+    warning: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
