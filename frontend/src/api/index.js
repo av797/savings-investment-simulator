@@ -53,6 +53,12 @@ export const getSimulationHistory = (goalId) =>
 export const getSimulation = (id) =>
   api.get(`/simulations/${id}`)
 
+export const runWhatIf = (goalId, extraMonthly, extraYears) =>
+  api.post(`/goals/${goalId}/whatif`, {
+    extra_monthly: extraMonthly,
+    extra_years:   extraYears,
+  })
+
 
 // ── Dashboard ──
 

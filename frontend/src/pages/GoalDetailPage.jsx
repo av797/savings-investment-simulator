@@ -8,6 +8,7 @@ import {
 } from '../api'
 import api from '../api/client'
 import GoalAnalysisCard from '../components/GoalAnalysisCard'
+import WhatIfSandbox from '../components/WhatIfSandbox'
 
 const fmt = (n) => new Intl.NumberFormat('en-GB', {
   style: 'currency', currency: 'GBP', maximumFractionDigits: 0
@@ -45,7 +46,6 @@ function SplitEditor({ goalId, initialSplits, onSaved }) {
     try {
       const res = await api.post(`/goals/${goalId}/suggest-split`)
       const { splits: suggested, profile, reasoning } = res.data
-      // Apply suggested splits to sliders
       setSplitsState({
         stocks: suggested.stocks || 0,
         etfs:   suggested.etfs   || 0,
@@ -53,7 +53,7 @@ function SplitEditor({ goalId, initialSplits, onSaved }) {
         cash:   suggested.cash   || 0,
       })
       setSuggestion({ profile, reasoning })
-    } catch (err) {
+    } catch {
       setError('Could not get suggestion')
     } finally {
       setSuggesting(false)
@@ -214,9 +214,9 @@ function FanChart({ breakdown, target }) {
         <YAxis tickFormatter={(v) => `£${(v/1000).toFixed(0)}k`} tick={{ fill: '#6b7280', fontSize: 12 }} />
         <Tooltip content={<CustomTooltip />} />
         <ReferenceLine y={target} stroke="#fbbf24" strokeDasharray="4 4" label={{ value: 'Target', fill: '#fbbf24', fontSize: 11 }} />
-        <Area type="monotone" dataKey="p90"          name="Best 10%"      stroke="#34d399" fill="url(#p90grad)" strokeWidth={1.5} />
-        <Area type="monotone" dataKey="median"       name="Median"        stroke="#60a5fa" fill="none"          strokeWidth={2} />
-        <Area type="monotone" dataKey="p10"          name="Worst 10%"     stroke="#f87171" fill="url(#p10grad)" strokeWidth={1.5} />
+        <Area type="monotone" dataKey="p90"           name="Best 10%"      stroke="#34d399" fill="url(#p90grad)" strokeWidth={1.5} />
+        <Area type="monotone" dataKey="median"        name="Median"        stroke="#60a5fa" fill="none"          strokeWidth={2} />
+        <Area type="monotone" dataKey="p10"           name="Worst 10%"     stroke="#f87171" fill="url(#p10grad)" strokeWidth={1.5} />
         <Area type="monotone" dataKey="contributions" name="Contributions" stroke="#6b7280" fill="none" strokeDasharray="3 3" strokeWidth={1} />
       </AreaChart>
     </ResponsiveContainer>
@@ -224,15 +224,16 @@ function FanChart({ breakdown, target }) {
 }
 
 export default function GoalDetailPage() {
-  const { id }    = useParams()
-  const navigate  = useNavigate()
-  const [goal, setGoal]               = useState(null)
-  const [simHistory, setSimHistory]   = useState([])
-  const [latestSim, setLatestSim]     = useState(null)
-  const [loading, setLoading]         = useState(true)
-  const [simLoading, setSimLoading]   = useState(false)
-  const [deleting, setDeleting]       = useState(false)
-  const [error, setError]             = useState('')
+  const { id }   = useParams()
+  const navigate = useNavigate()
+
+  const [goal, setGoal]             = useState(null)
+  const [simHistory, setSimHistory] = useState([])
+  const [latestSim, setLatestSim]   = useState(null)
+  const [loading, setLoading]       = useState(true)
+  const [simLoading, setSimLoading] = useState(false)
+  const [deleting, setDeleting]     = useState(false)
+  const [error, setError]           = useState('')
 
   const load = async () => {
     try {
@@ -417,6 +418,10 @@ export default function GoalDetailPage() {
             )}
           </div>
 
+          {goal.splits?.length > 0 && (
+            <WhatIfSandbox goalId={id} goal={goal} splits={goal.splits} />
+          )}
+
           {simHistory.length > 1 && (
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
               <h3 className="font-semibold text-white mb-4">Simulation history</h3>
@@ -445,8 +450,8 @@ export default function GoalDetailPage() {
           )}
 
           <GoalAnalysisCard
-                  goalId={id}
-                  latestSimSuccessRate={latestSim?.success_rate}
+            goalId={id}
+            latestSimSuccessRate={latestSim?.success_rate}
           />
 
         </div>

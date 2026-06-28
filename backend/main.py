@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from backend.routers import users, simulations, goals, inflation, markets, analysis, chat
+from backend.routers import users, simulations, goals, inflation, markets, analysis, chat, whatif
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
@@ -16,6 +16,7 @@ app.add_middleware(
 
 app.include_router(users.router)
 app.include_router(simulations.router)
+app.include_router(whatif.router)
 app.include_router(goals.router)
 app.include_router(inflation.router)
 app.include_router(markets.router)
