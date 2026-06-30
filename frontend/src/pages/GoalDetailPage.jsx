@@ -4,11 +4,13 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts'
 import {
-  getGoal, setSplits, runSimulation, getSimulationHistory, deleteGoal
+  getGoal, setSplits, runSimulation, getSimulationHistory, getSimulation, deleteGoal
 } from '../api'
 import api from '../api/client'
 import GoalAnalysisCard from '../components/GoalAnalysisCard'
 import WhatIfSandbox from '../components/WhatIfSandbox'
+import RetirementProjection from '../components/RetirementPage'
+import { useAuth } from '../context/AuthContext'
 
 const fmt = (n) => new Intl.NumberFormat('en-GB', {
   style: 'currency', currency: 'GBP', maximumFractionDigits: 0
@@ -226,6 +228,7 @@ function FanChart({ breakdown, target }) {
 export default function GoalDetailPage() {
   const { id }   = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const [goal, setGoal]             = useState(null)
   const [simHistory, setSimHistory] = useState([])
@@ -243,7 +246,10 @@ export default function GoalDetailPage() {
       ])
       setGoal(goalRes.data)
       setSimHistory(histRes.data)
-      if (histRes.data.length > 0) setLatestSim(histRes.data[0])
+      if (histRes.data.length > 0) {
+        const fullSim = await getSimulation(histRes.data[0].id)
+        setLatestSim(fullSim.data)
+      }
     } catch {
       setError('Failed to load goal')
     } finally {
@@ -421,6 +427,8 @@ export default function GoalDetailPage() {
           {goal.splits?.length > 0 && (
             <WhatIfSandbox goalId={id} goal={goal} splits={goal.splits} />
           )}
+
+          <RetirementProjection goal={goal} userAge={user?.age} latestSim={latestSim} />
 
           {simHistory.length > 1 && (
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
