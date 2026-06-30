@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from backend.routers import users, simulations, goals, inflation, markets, analysis, chat, whatif
+from backend.routers import users, simulations, goals, inflation, markets, analysis, chat, whatif, contributionschedule
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
@@ -22,6 +22,7 @@ app.include_router(inflation.router)
 app.include_router(markets.router)
 app.include_router(analysis.router)
 app.include_router(chat.router)
+app.include_router(contributionschedule.router)
 
 @app.get("/health")
 def health_check():
