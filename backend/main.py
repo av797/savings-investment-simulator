@@ -40,3 +40,7 @@ app.include_router(contributionschedule.router)
 @app.get("/health")
 def health_check():
     return {"status": "ok", "version": "2.0.0"}
+
+@app.head("/health")
+def health_check_head():
+    return {}
