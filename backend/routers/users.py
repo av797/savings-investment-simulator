@@ -1,9 +1,11 @@
-from fastapi import Depends, HTTPException, status, APIRouter
+from fastapi import Depends, HTTPException, status, APIRouter, Request
 from pydantic import field_validator
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from datetime import datetime, timezone
 from passlib.context import CryptContext
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from backend.db import models
 from backend.db.database import get_db
@@ -12,6 +14,7 @@ from backend.security import create_access_token
 from backend.dependencies import get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
+limiter = Limiter(key_func=get_remote_address)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,32 +27,19 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-#Health check
-
 @router.get("/health")
 def health_check(db: Session = Depends(get_db)):
     result = db.execute(text("SELECT 1")).scalar()
     return {"status": "ok", "db_result": result, "timestamp": datetime.now()}
 
 
-#Register
-
 @router.post("/users", status_code=201, response_model=UserOut)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-
-    @field_validator("age")
-    @classmethod
-    def validate_age(cls, v):
-        if v is not None and v < 18:
-            raise ValueError("You must be 18 or older to create an account")
-        return v
+@limiter.limit("10/hour")
+def create_user(request: Request, user: UserCreate, db: Session = Depends(get_db)):
 
     existing_user = db.query(models.User).filter(models.User.email == user.email).first()
-
-
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-
 
     new_user = models.User(
         email=user.email,
@@ -63,14 +53,13 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    
+
     return new_user
 
 
-#Login
-
 @router.post("/login")
-def login(user: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(
         models.User.email == user.email,
         models.User.is_active == True
@@ -86,7 +75,6 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-#Get current user
 
 @router.get("/me", response_model=UserOut)
 def get_user(user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -98,8 +86,6 @@ def get_user(user_id: int = Depends(get_current_user), db: Session = Depends(get
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-
-#Update current user
 
 @router.patch("/me", response_model=UserOut)
 def update_user(
@@ -138,12 +124,11 @@ def delete_user(user_id: int = Depends(get_current_user), db: Session = Depends(
         models.User.id == user_id,
         models.User.is_active == True
     ).first()
-    
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    
     user.is_active = False
     db.commit()
-    
+
     return
