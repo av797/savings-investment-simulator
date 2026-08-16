@@ -161,7 +161,7 @@ def chat(
     try:
         client   = Groq(api_key=api_key)
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="qwen/qwen3-27b",
             messages=messages,
             max_tokens=300,
             temperature=0.6,
