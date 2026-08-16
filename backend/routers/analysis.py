@@ -9,6 +9,7 @@ from backend.dependencies import get_current_user
 from backend.simulations.montecarlo import run_monte_carlo
 from backend.simulations.market_data import get_historical_returns
 from backend.simulations.ml_models import suggest_split, SPLIT_PROFILES
+from backend.routers.ai_limit import check_and_increment_ai_usage
 
 router = APIRouter(tags=["Analysis"])
 
@@ -44,7 +45,6 @@ def _build_splits_dict(splits):
 
 
 def _run_quick_sim(goal, splits_dict, historical_returns, monthly_contribution=None):
-    """Run a quick 2000-scenario simulation — fast enough for iterative improvement calc."""
     return run_monte_carlo(
         starting_balance=float(goal.current_balance),
         monthly_contribution=monthly_contribution or float(goal.monthly_allocation),
@@ -58,16 +58,11 @@ def _run_quick_sim(goal, splits_dict, historical_returns, monthly_contribution=N
 
 
 def _find_extra_contribution_needed(goal, splits_dict, historical_returns, current_rate):
-    """
-    Binary search for the minimum extra monthly contribution
-    that pushes success rate above 75%.
-    Returns (extra_amount, new_success_rate) or (None, current_rate) if already >= 75%.
-    """
     if current_rate >= 75:
         return None, current_rate
 
     current_monthly = float(goal.monthly_allocation)
-    low, high = 0, 2000 
+    low, high = 0, 2000
 
     best_extra = None
     best_rate  = current_rate
@@ -92,10 +87,6 @@ def _find_extra_contribution_needed(goal, splits_dict, historical_returns, curre
 
 
 def _find_better_split(goal, user, historical_returns, current_rate):
-    """
-    Use the ML model to suggest a better split, simulate it,
-    and return the suggestion if it improves success rate by > 5%.
-    """
     suggestion = suggest_split(
         age=user.age,
         monthly_income=float(user.monthly_income) if user.monthly_income else None,
@@ -129,7 +120,6 @@ def _find_better_split(goal, user, historical_returns, current_rate):
 
 
 def _call_groq(prompt: str) -> str:
-    """Call Groq API and return the generated text."""
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         return None
@@ -137,7 +127,7 @@ def _call_groq(prompt: str) -> str:
     try:
         client   = Groq(api_key=api_key)
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="qwen/qwen3-27b",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200,
             temperature=0.5,
@@ -149,8 +139,6 @@ def _call_groq(prompt: str) -> str:
 
 def _build_prompt(goal, user, current_rate, extra_needed, new_rate_with_extra,
                   split_suggestion, goal_type_label):
-    """Build the Groq prompt from pre-calculated numbers."""
-
     parts = [
         f"The user has a {goal_type_label} goal targeting £{float(goal.target_amount):,.0f} "
         f"in {goal.years} years, currently saving £{float(goal.monthly_allocation):,.0f}/month. "
@@ -188,13 +176,6 @@ def analyse_goal(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Analyses a goal and returns:
-    - current success rate
-    - extra monthly contribution needed to hit 75%
-    - better split suggestion from ML model
-    - AI-generated natural language suggestion from Groq
-    """
     goal = _get_goal_or_404(db, goal_id, user_id)
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
@@ -226,6 +207,7 @@ def analyse_goal(
 
     ai_suggestion = None
     if current_rate < 75:
+        check_and_increment_ai_usage(user_id, db)
         prompt        = _build_prompt(
             goal, user, current_rate, extra_needed, new_rate_with_extra,
             split_suggestion, goal_type_label

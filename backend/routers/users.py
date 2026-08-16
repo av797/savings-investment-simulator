@@ -1,11 +1,11 @@
 from fastapi import Depends, HTTPException, status, APIRouter, Request
-from pydantic import field_validator
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from datetime import datetime, timezone
 from passlib.context import CryptContext
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+import base64
 
 from backend.db import models
 from backend.db.database import get_db
@@ -18,6 +18,16 @@ limiter = Limiter(key_func=get_remote_address)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# 2MB in bytes — base64 encoding adds ~33% overhead so we check the decoded size
+MAX_AVATAR_BYTES = 2 * 1024 * 1024
+
+ALLOWED_IMAGE_PREFIXES = (
+    "data:image/jpeg;base64,",
+    "data:image/png;base64,",
+    "data:image/gif;base64,",
+    "data:image/webp;base64,",
+)
+
 
 def hash_password(password: str):
     return pwd_context.hash(password)
@@ -26,6 +36,27 @@ def hash_password(password: str):
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
+
+def validate_avatar(avatar: str) -> None:
+    if avatar is None:
+        return
+
+    if not any(avatar.startswith(prefix) for prefix in ALLOWED_IMAGE_PREFIXES):
+        raise HTTPException(
+            status_code=400,
+            detail="Avatar must be a valid image (JPEG, PNG, GIF, or WebP)"
+        )
+
+    try:
+        base64_data = avatar.split(",", 1)[1]
+        decoded = base64.b64decode(base64_data)
+        if len(decoded) > MAX_AVATAR_BYTES:
+            raise HTTPException(
+                status_code=400,
+                detail="Avatar must be under 2MB"
+            )
+    except (IndexError, ValueError):
+        raise HTTPException(status_code=400, detail="Invalid avatar format")
 
 @router.get("/health")
 def health_check(db: Session = Depends(get_db)):
@@ -75,7 +106,6 @@ def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-
 @router.get("/me", response_model=UserOut)
 def get_user(user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(
@@ -107,6 +137,9 @@ def update_user(
             status_code=400,
             detail=f"risk_profile must be one of {valid_profiles}"
         )
+
+    if "avatar" in data.model_dump(exclude_unset=True) and data.avatar is not None:
+        validate_avatar(data.avatar)
 
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():

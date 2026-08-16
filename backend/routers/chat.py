@@ -9,12 +9,13 @@ from groq import Groq
 from backend.db.database import get_db
 from backend.db import models
 from backend.dependencies import get_current_user
+from backend.routers.ai_limit import check_and_increment_ai_usage
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
 class ChatMessage(BaseModel):
-    role: str 
+    role: str
     content: str
 
 
@@ -24,7 +25,6 @@ class ChatRequest(BaseModel):
 
 
 def _get_user_context(user_id: int, db: Session) -> str:
-    """Build a rich context string from the user's goals and simulations."""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         return ""
@@ -85,7 +85,6 @@ def _get_user_context(user_id: int, db: Session) -> str:
 
 
 def _get_market_context(db: Session) -> str:
-    """Pull key market stats from the market_returns table."""
     try:
         rows = db.execute(text("""
             SELECT
@@ -149,6 +148,8 @@ def chat(
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         raise HTTPException(status_code=503, detail="Chat is not configured")
+
+    check_and_increment_ai_usage(user_id, db)
 
     user_context   = _get_user_context(user_id, db)
     market_context = _get_market_context(db)
