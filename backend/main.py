@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import threading
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
@@ -14,9 +15,8 @@ load_dotenv()
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Pre-training ML model...")
+def pretrain_model():
+    """Run in background thread so server binds to port immediately."""
     try:
         from backend.db.database import SessionLocal
         from backend.simulations.market_data import get_historical_returns
@@ -33,6 +33,13 @@ async def lifespan(app: FastAPI):
             db.close()
     except Exception as e:
         print(f"ML pre-train failed: {e}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Start pre-training in background, doesn't block port binding
+    thread = threading.Thread(target=pretrain_model, daemon=True)
+    thread.start()
     yield
 
 
