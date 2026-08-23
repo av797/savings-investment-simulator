@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status, APIRouter, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -18,8 +18,9 @@ limiter = Limiter(key_func=get_remote_address)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# 2MB in bytes — base64 encoding adds ~33% overhead so we check the decoded size
 MAX_AVATAR_BYTES = 2 * 1024 * 1024
+MAX_FAILED_ATTEMPTS = 5
+LOCKOUT_MINUTES = 15
 
 ALLOWED_IMAGE_PREFIXES = (
     "data:image/jpeg;base64,",
@@ -51,10 +52,7 @@ def validate_avatar(avatar: str) -> None:
         base64_data = avatar.split(",", 1)[1]
         decoded = base64.b64decode(base64_data)
         if len(decoded) > MAX_AVATAR_BYTES:
-            raise HTTPException(
-                status_code=400,
-                detail="Avatar must be under 2MB"
-            )
+            raise HTTPException(status_code=400, detail="Avatar must be under 2MB")
     except (IndexError, ValueError):
         raise HTTPException(status_code=400, detail="Invalid avatar format")
 
@@ -96,13 +94,42 @@ def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
         models.User.is_active == True
     ).first()
 
-    if not db_user or not verify_password(user.password, db_user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    invalid_error = HTTPException(status_code=401, detail="Invalid email or password")
 
-    access_token = create_access_token(data={"user_id": db_user.id})
-    db_user.last_login = datetime.now(timezone.utc)
+    if not db_user:
+        raise invalid_error
+
+    now = datetime.now(timezone.utc)
+    if db_user.locked_until and db_user.locked_until.replace(tzinfo=timezone.utc) > now:
+        minutes_remaining = int(
+            (db_user.locked_until.replace(tzinfo=timezone.utc) - now).total_seconds() / 60
+        ) + 1
+        raise HTTPException(
+            status_code=423,
+            detail=f"Account temporarily locked due to too many failed attempts. Try again in {minutes_remaining} minute{'s' if minutes_remaining != 1 else ''}."
+        )
+
+    if not verify_password(user.password, db_user.password_hash):
+        db_user.failed_login_attempts = (db_user.failed_login_attempts or 0) + 1
+
+        if db_user.failed_login_attempts >= MAX_FAILED_ATTEMPTS:
+            db_user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=LOCKOUT_MINUTES)
+            db_user.failed_login_attempts = 0
+            db.commit()
+            raise HTTPException(
+                status_code=423,
+                detail=f"Too many failed attempts. Account locked for {LOCKOUT_MINUTES} minutes."
+            )
+
+        db.commit()
+        raise invalid_error
+
+    db_user.failed_login_attempts = 0
+    db_user.locked_until          = None
+    db_user.last_login            = now
     db.commit()
 
+    access_token = create_access_token(data={"user_id": db_user.id})
     return {"access_token": access_token, "token_type": "bearer"}
 
 
