@@ -12,6 +12,11 @@ from backend.db.database import get_db
 from backend.schemas import UserCreate, UserOut, UserLogin, UserUpdate
 from backend.security import create_access_token
 from backend.dependencies import get_current_user
+from backend.routers.security_logger import (
+    log_security_event,
+    LOGIN_SUCCESS, LOGIN_FAILED, ACCOUNT_LOCKED,
+    AVATAR_REJECTED, ACCOUNT_DELETED, REGISTER_SUCCESS,
+)
 
 router = APIRouter(prefix="/users", tags=["Users"])
 limiter = Limiter(key_func=get_remote_address)
@@ -38,11 +43,13 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def validate_avatar(avatar: str) -> None:
+def validate_avatar(avatar: str, user_id: int, ip: str, db: Session) -> None:
     if avatar is None:
         return
 
     if not any(avatar.startswith(prefix) for prefix in ALLOWED_IMAGE_PREFIXES):
+        log_security_event(db, AVATAR_REJECTED, ip_address=ip, user_id=user_id,
+                           detail="Invalid image type")
         raise HTTPException(
             status_code=400,
             detail="Avatar must be a valid image (JPEG, PNG, GIF, or WebP)"
@@ -50,11 +57,21 @@ def validate_avatar(avatar: str) -> None:
 
     try:
         base64_data = avatar.split(",", 1)[1]
-        decoded = base64.b64decode(base64_data)
+        decoded     = base64.b64decode(base64_data)
         if len(decoded) > MAX_AVATAR_BYTES:
+            log_security_event(db, AVATAR_REJECTED, ip_address=ip, user_id=user_id,
+                               detail=f"File too large: {len(decoded)} bytes")
             raise HTTPException(status_code=400, detail="Avatar must be under 2MB")
     except (IndexError, ValueError):
         raise HTTPException(status_code=400, detail="Invalid avatar format")
+
+
+def get_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
 
 @router.get("/health")
 def health_check(db: Session = Depends(get_db)):
@@ -83,12 +100,17 @@ def create_user(request: Request, user: UserCreate, db: Session = Depends(get_db
     db.commit()
     db.refresh(new_user)
 
+    log_security_event(db, REGISTER_SUCCESS, ip_address=get_ip(request),
+                       user_id=new_user.id, detail=user.email)
+
     return new_user
 
 
 @router.post("/login")
 @limiter.limit("20/minute")
 def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
+    ip = get_ip(request)
+
     db_user = db.query(models.User).filter(
         models.User.email == user.email,
         models.User.is_active == True
@@ -97,6 +119,7 @@ def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
     invalid_error = HTTPException(status_code=401, detail="Invalid email or password")
 
     if not db_user:
+        log_security_event(db, LOGIN_FAILED, ip_address=ip, detail=f"Unknown email: {user.email}")
         raise invalid_error
 
     now = datetime.now(timezone.utc)
@@ -106,28 +129,34 @@ def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
         ) + 1
         raise HTTPException(
             status_code=423,
-            detail=f"Account temporarily locked due to too many failed attempts. Try again in {minutes_remaining} minute{'s' if minutes_remaining != 1 else ''}."
+            detail=f"Account temporarily locked. Try again in {minutes_remaining} minute{'s' if minutes_remaining != 1 else ''}."
         )
 
     if not verify_password(user.password, db_user.password_hash):
         db_user.failed_login_attempts = (db_user.failed_login_attempts or 0) + 1
 
         if db_user.failed_login_attempts >= MAX_FAILED_ATTEMPTS:
-            db_user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=LOCKOUT_MINUTES)
+            db_user.locked_until          = now + timedelta(minutes=LOCKOUT_MINUTES)
             db_user.failed_login_attempts = 0
             db.commit()
+            log_security_event(db, ACCOUNT_LOCKED, ip_address=ip, user_id=db_user.id,
+                               detail=f"Locked for {LOCKOUT_MINUTES} minutes")
             raise HTTPException(
                 status_code=423,
                 detail=f"Too many failed attempts. Account locked for {LOCKOUT_MINUTES} minutes."
             )
 
         db.commit()
+        log_security_event(db, LOGIN_FAILED, ip_address=ip, user_id=db_user.id,
+                           detail=f"Attempt {db_user.failed_login_attempts}")
         raise invalid_error
 
     db_user.failed_login_attempts = 0
     db_user.locked_until          = None
     db_user.last_login            = now
     db.commit()
+
+    log_security_event(db, LOGIN_SUCCESS, ip_address=ip, user_id=db_user.id)
 
     access_token = create_access_token(data={"user_id": db_user.id})
     return {"access_token": access_token, "token_type": "bearer"}
@@ -146,6 +175,7 @@ def get_user(user_id: int = Depends(get_current_user), db: Session = Depends(get
 
 @router.patch("/me", response_model=UserOut)
 def update_user(
+    request: Request,
     data: UserUpdate,
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -166,7 +196,7 @@ def update_user(
         )
 
     if "avatar" in data.model_dump(exclude_unset=True) and data.avatar is not None:
-        validate_avatar(data.avatar)
+        validate_avatar(data.avatar, user_id=user_id, ip=get_ip(request), db=db)
 
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -178,8 +208,11 @@ def update_user(
 
 
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
-
+def delete_user(
+    request: Request,
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     user = db.query(models.User).filter(
         models.User.id == user_id,
         models.User.is_active == True
@@ -187,6 +220,9 @@ def delete_user(user_id: int = Depends(get_current_user), db: Session = Depends(
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    log_security_event(db, ACCOUNT_DELETED, ip_address=get_ip(request),
+                       user_id=user_id, detail=user.email)
 
     user.is_active = False
     db.commit()

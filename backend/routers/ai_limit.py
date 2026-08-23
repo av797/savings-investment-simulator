@@ -20,6 +20,13 @@ def check_and_increment_ai_usage(user_id: int, db: Session) -> None:
     count = result.scalar()
 
     if count > DAILY_AI_LIMIT:
+        try:
+            from backend.routers.security_logger import log_security_event, AI_LIMIT_HIT
+            log_security_event(db, AI_LIMIT_HIT, user_id=user_id,
+                               detail=f"Daily limit of {DAILY_AI_LIMIT} exceeded")
+        except Exception:
+            pass
+
         raise HTTPException(
             status_code=429,
             detail=f"Daily AI limit of {DAILY_AI_LIMIT} requests reached. Resets at midnight."
