@@ -9,6 +9,7 @@ from backend.schemas import (
     GoalSplitsUpdate, GoalSplitOut,
 )
 from backend.dependencies import get_current_user
+from backend.routers.sanitise import sanitise_goal_input
 
 router = APIRouter(prefix="/goals", tags=["Goals"])
 
@@ -42,16 +43,18 @@ def create_goal(
             detail=f"Total allocations would exceed your monthly income. You have £{remaining:,.0f} remaining to allocate."
         )
 
+    clean_name, clean_notes = sanitise_goal_input(data.name, data.notes)
+
     goal = models.Goal(
         user_id=user_id,
-        name=data.name,
+        name=clean_name,
         goal_type=data.goal_type,
         target_amount=data.target_amount,
         monthly_allocation=data.monthly_allocation,
         years=data.years,
         inflation_rate=data.inflation_rate,
         current_balance=data.current_balance,
-        notes=data.notes,
+        notes=clean_notes,
     )
     db.add(goal)
     db.flush()
@@ -112,7 +115,6 @@ def update_goal(
 ):
     goal = _get_goal_or_404(db, goal_id, user_id)
     user = db.query(models.User).filter(models.User.id == user_id).first()
-
     
     if data.monthly_allocation is not None and user.monthly_income:
         other_goals = db.query(models.Goal).filter(
@@ -130,6 +132,12 @@ def update_goal(
             )
 
     update_data = data.model_dump(exclude_unset=True)
+
+    if "name" in update_data:
+        update_data["name"] = sanitise_goal_input(update_data["name"], None)[0]
+    if "notes" in update_data:
+        update_data["notes"] = sanitise_goal_input(None, update_data["notes"])[1]
+
     for field, value in update_data.items():
         setattr(goal, field, value)
 
@@ -158,7 +166,7 @@ def set_splits(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    goal = _get_goal_or_404(db, goal_id, user_id)
+    goal   = _get_goal_or_404(db, goal_id, user_id)
     splits = _replace_splits(db, goal.id, data.splits)
     db.commit()
     return splits
@@ -178,7 +186,6 @@ def get_splits(
     )
 
 
-#ML split suggestion
 
 @router.post("/{goal_id}/suggest-split")
 def suggest_split(
@@ -207,8 +214,6 @@ def suggest_split(
 
     return result
 
-
-#Helpers
 
 def _get_goal_or_404(db: Session, goal_id: int, user_id: int) -> models.Goal:
     goal = (

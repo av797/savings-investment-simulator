@@ -14,9 +14,10 @@ load_dotenv()
 
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 
+MAX_BODY_SIZE = 1 * 1024 * 1024
+
 
 def pretrain_model():
-    """Run in background thread so server binds to port immediately."""
     try:
         from backend.db.database import SessionLocal
         from backend.simulations.market_data import get_historical_returns
@@ -37,7 +38,6 @@ def pretrain_model():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Start pre-training in background, doesn't block port binding
     thread = threading.Thread(target=pretrain_model, daemon=True)
     thread.start()
     yield
@@ -50,7 +50,17 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 
-#Security headers middleware
+@app.middleware("http")
+async def limit_request_size(request: Request, call_next):
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > MAX_BODY_SIZE:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=413,
+            content={"detail": "Request body too large. Maximum size is 1MB."}
+        )
+    return await call_next(request)
+
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)

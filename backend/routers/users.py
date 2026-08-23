@@ -23,9 +23,9 @@ limiter = Limiter(key_func=get_remote_address)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-MAX_AVATAR_BYTES = 2 * 1024 * 1024
+MAX_AVATAR_BYTES    = 2 * 1024 * 1024
 MAX_FAILED_ATTEMPTS = 5
-LOCKOUT_MINUTES = 15
+LOCKOUT_MINUTES     = 15
 
 ALLOWED_IMAGE_PREFIXES = (
     "data:image/jpeg;base64,",
@@ -41,6 +41,13 @@ def hash_password(password: str):
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
 
 def validate_avatar(avatar: str, user_id: int, ip: str, db: Session) -> None:
@@ -66,12 +73,6 @@ def validate_avatar(avatar: str, user_id: int, ip: str, db: Session) -> None:
         raise HTTPException(status_code=400, detail="Invalid avatar format")
 
 
-def get_ip(request: Request) -> str:
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
-
 
 @router.get("/health")
 def health_check(db: Session = Depends(get_db)):
@@ -84,8 +85,14 @@ def health_check(db: Session = Depends(get_db)):
 def create_user(request: Request, user: UserCreate, db: Session = Depends(get_db)):
 
     existing_user = db.query(models.User).filter(models.User.email == user.email).first()
+
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        log_security_event(db, LOGIN_FAILED, ip_address=get_ip(request),
+                           detail=f"Registration attempted with existing email: {user.email}")
+        raise HTTPException(
+            status_code=400,
+            detail="If this email is not already registered, your account has been created. Please try logging in."
+        )
 
     new_user = models.User(
         email=user.email,
@@ -119,7 +126,8 @@ def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
     invalid_error = HTTPException(status_code=401, detail="Invalid email or password")
 
     if not db_user:
-        log_security_event(db, LOGIN_FAILED, ip_address=ip, detail=f"Unknown email: {user.email}")
+        log_security_event(db, LOGIN_FAILED, ip_address=ip,
+                           detail=f"Unknown email: {user.email}")
         raise invalid_error
 
     now = datetime.now(timezone.utc)
