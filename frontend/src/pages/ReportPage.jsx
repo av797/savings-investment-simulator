@@ -2,15 +2,11 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getDashboard } from '../api'
 import api from '../api/client'
+import GoalIcon from '../components/GoalIcon'
 
 const fmt = (n) => new Intl.NumberFormat('en-GB', {
   style: 'currency', currency: 'GBP', maximumFractionDigits: 0
 }).format(n)
-
-const GOAL_ICONS = {
-  house: '🏠', retirement: '👴', emergency_fund: '🛡️',
-  education: '🎓', travel: '✈️', other: '🎯',
-}
 
 function RiskWarning({ goal, sim }) {
   if (!sim) return null
@@ -289,7 +285,9 @@ export default function ReportPage() {
 
   if (!data?.goals?.length) return (
     <div className="max-w-4xl mx-auto px-6 py-24 text-center">
-      <div className="text-4xl mb-4">📊</div>
+      <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gray-800 flex items-center justify-center text-gray-500">
+        <GoalIcon type="other" className="w-6 h-6" />
+      </div>
       <h3 className="text-white font-semibold mb-2">No goals yet</h3>
       <p className="text-gray-500 mb-6">Create some goals and run simulations to see your report</p>
       <Link to="/goals/new" className="bg-emerald-400 text-gray-950 font-semibold px-6 py-2.5 rounded-xl text-sm">
@@ -402,7 +400,9 @@ export default function ReportPage() {
             <div key={goal.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{GOAL_ICONS[goal.goal_type] || '🎯'}</span>
+                  <div className="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 flex-shrink-0">
+                    <GoalIcon type={goal.goal_type} className="w-[18px] h-[18px]" />
+                  </div>
                   <div>
                     <h3 className="font-semibold text-white">{goal.name}</h3>
                     <p className="text-sm text-gray-500">

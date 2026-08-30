@@ -1,4 +1,5 @@
 import os
+import re
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -22,6 +23,11 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     page_context: Optional[str] = None
+
+
+def _strip_reasoning(text: str) -> str:
+    cleaned = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+    return cleaned if cleaned else text.strip()
 
 
 def _get_user_context(user_id: int, db: Session) -> str:
@@ -135,6 +141,7 @@ RULES:
 - Use £ for currency since this is a UK-focused app
 - When success rates are below 75%, gently flag it and suggest they use the AI Analysis feature on the goal page
 - Keep responses conversational — this is a chat, not a report
+- Respond with only the final answer. Do not include any reasoning, thinking steps, or <think> tags in your output.
 
 You are NOT a general purpose assistant. Stay focused on personal finance, the user's goals, and market data. If asked about unrelated topics, politely redirect."""
 
@@ -162,13 +169,14 @@ def chat(
     try:
         client   = Groq(api_key=api_key)
         response = client.chat.completions.create(
-            model="qwen/qwen3-27b",
+            model="qwen/qwen3.6-27b",
             messages=messages,
             max_tokens=300,
             temperature=0.6,
+            reasoning_effort="none",
         )
-        reply = response.choices[0].message.content.strip()
+        reply = _strip_reasoning(response.choices[0].message.content.strip())
         return {"reply": reply}
     except Exception as e:
-        print(f"GROQ ERROR: {str(e)}") 
+        print(f"GROQ ERROR: {str(e)}")
         raise HTTPException(status_code=503, detail="Chat service unavailable")

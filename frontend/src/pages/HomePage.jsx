@@ -12,17 +12,17 @@ const STEPS = [
   {
     label: 'Step 1',
     title: 'Set a goal',
-    desc:  "Pick what you're saving for — a house, retirement, something else. Set your target, timeline and monthly contribution. Inflation is pulled from live World Bank data.",
+    desc:  "Pick what you're saving for: a house, retirement, something else. Set your target, timeline and monthly contribution. Inflation is pulled from live World Bank data.",
   },
   {
     label: 'Step 2',
     title: 'Choose how to invest',
-    desc:  'Drag sliders to split your money across stocks, ETFs, bonds and cash. Or ask the AI to suggest an allocation based on your age, risk tolerance and goal type.',
+    desc:  'Drag sliders to split your money across stocks, ETFs, bonds and cash, or ask the AI to suggest an allocation based on your age, risk tolerance and goal type.',
   },
   {
     label: 'Step 3',
     title: 'Run the simulation',
-    desc:  '10,000 scenarios using 30 years of real annual returns — including 2008, 2020 and 2022. See the range of outcomes, then adjust if the numbers look off.',
+    desc:  '10,000 scenarios using 30 years of real annual returns, including 2008, 2020 and 2022. See the range of outcomes, then adjust if the numbers look off.',
   },
 ]
 
@@ -118,12 +118,12 @@ export default function HomePage() {
             Goal-based financial planning
           </p>
           <h1 className="text-5xl md:text-6xl font-bold text-white leading-[1.08] mb-6 tracking-tight">
-            See where your money<br />
-            ends up — before it does.
+            Know where your money<br />
+            ends up before it gets there.
           </h1>
           <p className="text-gray-400 text-lg leading-relaxed max-w-xl mb-10">
             GoalIQ runs 10,000 simulations of your savings plan using real market data going back 30 years.
-            Not a calculator. Not a guess. A proper look at your range of outcomes.
+            Not a calculator, not a guess. A proper look at the range of things that could happen.
           </p>
           <div className="flex items-center gap-4">
             <Link
@@ -188,7 +188,7 @@ export default function HomePage() {
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">Grounded in real data</h2>
               <p className="text-gray-500 text-sm max-w-md">
-                Simulations use actual annual returns sourced from Yahoo Finance — not assumed averages.
+                Simulations use actual annual returns sourced from Yahoo Finance, not assumed averages.
                 That includes crash years like 2008 and 2022.
               </p>
             </div>
@@ -221,14 +221,14 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
 
             <div data-reveal>
-              <p className="text-purple-400 text-xs font-semibold uppercase tracking-widest mb-5">AI Agent</p>
+              <p className="text-purple-400 text-xs font-semibold uppercase tracking-widest mb-5">Assistant</p>
               <h2 className="text-2xl font-bold text-white mb-4">
                 Ask questions about your actual plan
               </h2>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                The built-in AI Agent knows your goals, simulation results and market data.
-                It's not a generic chatbot — it can tell you why your retirement goal is at 52%
-                or what bonds returned in 2008, because it's reading your real numbers.
+                The built-in assistant reads your goals, simulation results and market data directly.
+                Ask why your retirement goal sits at 52%, or what bonds returned in 2008, and it answers
+                from your real numbers instead of a generic script.
               </p>
               <p className="text-gray-600 text-xs">Not regulated financial advice.</p>
             </div>
@@ -250,7 +250,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex justify-start">
                   <div className="bg-gray-800 text-gray-200 text-sm px-4 py-2.5 rounded-2xl rounded-bl-sm max-w-[85%] leading-relaxed">
-                    Your retirement goal has a 78% success rate — that's solid. Your house deposit is at 52%, which is worth looking at. Adding around £150/month would push it above 75%.
+                    Your retirement goal has a 78% success rate, which is solid. Your house deposit is at 52% though, worth a look. Adding around £150/month would push it above 75%.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -260,7 +260,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex justify-start">
                   <div className="bg-gray-800 text-gray-200 text-sm px-4 py-2.5 rounded-2xl rounded-bl-sm max-w-[85%] leading-relaxed">
-                    The S&P 500 returned −38.5% in 2008. That crash is included in your simulations, which is why your success rate accounts for worst-case scenarios.
+                    The S&P 500 returned about -38.5% that year. That crash is baked into your simulations, which is why your success rate already accounts for a bad run like it.
                   </div>
                 </div>
               </div>

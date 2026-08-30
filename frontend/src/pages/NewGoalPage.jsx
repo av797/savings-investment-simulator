@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { createGoal } from '../api'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
+import GoalIcon from '../components/GoalIcon'
 
 const GOAL_TYPES = [
-  { value: 'house',          label: 'House deposit',  icon: '🏠' },
-  { value: 'retirement',     label: 'Retirement',     icon: '👴' },
-  { value: 'emergency_fund', label: 'Emergency fund', icon: '🛡️' },
-  { value: 'education',      label: 'Education',      icon: '🎓' },
-  { value: 'travel',         label: 'Travel',         icon: '✈️' },
-  { value: 'other',          label: 'Other',          icon: '🎯' },
+  { value: 'house',          label: 'House deposit' },
+  { value: 'retirement',     label: 'Retirement' },
+  { value: 'emergency_fund', label: 'Emergency fund' },
+  { value: 'education',      label: 'Education' },
+  { value: 'travel',         label: 'Travel' },
+  { value: 'other',          label: 'Other' },
 ]
 
 const COUNTRIES = [
@@ -165,7 +166,7 @@ export default function NewGoalPage() {
                     : 'border-gray-700 bg-gray-800/50 text-gray-400 hover:border-gray-600'
                 }`}
               >
-                <span className="text-xl">{type.icon}</span>
+                <GoalIcon type={type.value} className="w-5 h-5" />
                 <span>{type.label}</span>
               </button>
             ))}

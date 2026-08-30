@@ -1,4 +1,5 @@
 import os
+import re
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from groq import Groq
@@ -119,6 +120,11 @@ def _find_better_split(goal, user, historical_returns, current_rate):
     }
 
 
+def _strip_reasoning(text: str) -> str:
+    cleaned = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+    return cleaned if cleaned else text.strip()
+
+
 def _call_groq(prompt: str) -> str:
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
@@ -127,12 +133,13 @@ def _call_groq(prompt: str) -> str:
     try:
         client   = Groq(api_key=api_key)
         response = client.chat.completions.create(
-            model="qwen/qwen3-27b",
+            model="qwen/qwen3.6-27b",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200,
             temperature=0.5,
+            reasoning_effort="none",
         )
-        return response.choices[0].message.content.strip()
+        return _strip_reasoning(response.choices[0].message.content.strip())
     except Exception:
         return None
 
@@ -164,7 +171,8 @@ def _build_prompt(goal, user, current_rate, extra_needed, new_rate_with_extra,
     parts.append(
         "Write a concise, friendly 2-3 sentence suggestion explaining what they should do and why. "
         "Be specific with the numbers. Do not use jargon. Do not mention Monte Carlo or algorithms. "
-        "Sound like a knowledgeable friend giving honest advice. Do not start with 'I'."
+        "Sound like a knowledgeable friend giving honest advice. Do not start with 'I'. "
+        "Respond with only the final suggestion. Do not include any reasoning, thinking steps, or <think> tags."
     )
 
     return " ".join(parts)

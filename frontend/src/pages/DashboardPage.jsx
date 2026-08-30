@@ -2,15 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getDashboard, deleteGoal } from '../api'
 import { useAuth } from '../context/AuthContext'
-
-const GOAL_ICONS = {
-  house:          '🏠',
-  retirement:     '👴',
-  emergency_fund: '🛡️',
-  education:      '🎓',
-  travel:         '✈️',
-  other:          '🎯',
-}
+import GoalIcon from '../components/GoalIcon'
 
 const fmt = (n) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(n)
 
@@ -34,7 +26,9 @@ function GoalCard({ item, onDelete, isWeakest }) {
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{GOAL_ICONS[goal.goal_type] || '🎯'}</span>
+          <div className="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 flex-shrink-0">
+            <GoalIcon type={goal.goal_type} className="w-[18px] h-[18px]" />
+          </div>
           <div>
             <h3 className="font-semibold text-white">{goal.name}</h3>
             <p className="text-sm text-gray-500">{goal.years} year{goal.years !== 1 ? 's' : ''} · {fmt(goal.monthly_allocation)}/mo</p>
@@ -165,7 +159,9 @@ export default function DashboardPage() {
       {/* Goals grid */}
       {data?.goals?.length === 0 ? (
         <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-          <div className="text-4xl mb-4">🎯</div>
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gray-800 flex items-center justify-center text-gray-500">
+            <GoalIcon type="other" className="w-6 h-6" />
+          </div>
           <h3 className="text-white font-semibold mb-2">No goals yet</h3>
           <p className="text-gray-500 mb-6">Create your first financial goal to get started</p>
           <Link
