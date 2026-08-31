@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
+import ConfirmModal from '../components/ConfirmModal'
 
 const RISK_OPTIONS = [
   {
@@ -43,6 +44,7 @@ export default function SettingsPage() {
   const [error, setError]                     = useState('')
   const [deleting, setDeleting]               = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -124,7 +126,6 @@ export default function SettingsPage() {
   }
 
   const handleDeleteAccount = async () => {
-    if (!confirm('Are you sure you want to delete your account? This cannot be undone.')) return
     setDeleting(true)
     try {
       await api.delete('/users/me')
@@ -133,11 +134,23 @@ export default function SettingsPage() {
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to delete account')
       setDeleting(false)
+      setShowDeleteModal(false)
     }
   }
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
+
+      <ConfirmModal
+        open={showDeleteModal}
+        title="Delete your account?"
+        message="This will permanently remove your account, all goals, and all simulation history. This cannot be undone."
+        confirmLabel={deleting ? 'Deleting...' : 'Delete account'}
+        cancelLabel="Cancel"
+        danger
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteAccount}
+      />
 
       <div className="mb-8">
         <button
@@ -320,11 +333,11 @@ export default function SettingsPage() {
           Permanently delete your account and all associated goals and simulations. This cannot be undone.
         </p>
         <button
-          onClick={handleDeleteAccount}
+          onClick={() => setShowDeleteModal(true)}
           disabled={deleting}
           className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-medium rounded-xl px-4 py-2.5 text-sm transition-colors disabled:opacity-50"
         >
-          {deleting ? 'Deleting...' : 'Delete my account'}
+          Delete my account
         </button>
       </div>
 

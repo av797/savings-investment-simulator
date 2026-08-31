@@ -10,6 +10,7 @@ import api from '../api/client'
 import GoalAnalysisCard from '../components/GoalAnalysisCard'
 import WhatIfSandbox from '../components/WhatIfSandbox'
 import RetirementProjection from '../components/RetirementPage'
+import ConfirmModal from '../components/ConfirmModal'
 import { useAuth } from '../context/AuthContext'
 
 const fmt = (n) => new Intl.NumberFormat('en-GB', {
@@ -237,6 +238,7 @@ export default function GoalDetailPage() {
   const [simLoading, setSimLoading] = useState(false)
   const [deleting, setDeleting]     = useState(false)
   const [error, setError]           = useState('')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const load = async () => {
     try {
@@ -276,7 +278,6 @@ export default function GoalDetailPage() {
   }
 
   const handleDelete = async () => {
-    if (!confirm(`Delete "${goal.name}"? This cannot be undone.`)) return
     setDeleting(true)
     try {
       await deleteGoal(id)
@@ -284,6 +285,7 @@ export default function GoalDetailPage() {
     } catch {
       setError('Failed to delete goal')
       setDeleting(false)
+      setShowDeleteModal(false)
     }
   }
 
@@ -306,6 +308,17 @@ export default function GoalDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
 
+      <ConfirmModal
+        open={showDeleteModal}
+        title="Delete this goal?"
+        message={`"${goal.name}" and all its simulations will be permanently removed. This cannot be undone.`}
+        confirmLabel={deleting ? 'Deleting...' : 'Delete goal'}
+        cancelLabel="Cancel"
+        danger
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+      />
+
       <div className="flex items-start justify-between mb-8">
         <div>
           <button
@@ -320,11 +333,10 @@ export default function GoalDetailPage() {
           </p>
         </div>
         <button
-          onClick={handleDelete}
-          disabled={deleting}
+          onClick={() => setShowDeleteModal(true)}
           className="text-sm text-gray-500 hover:text-red-400 transition-colors"
         >
-          {deleting ? 'Deleting...' : 'Delete goal'}
+          Delete goal
         </button>
       </div>
 

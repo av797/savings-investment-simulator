@@ -10,6 +10,7 @@ import Navbar from './components/Navbar'
 import MarketsPage from './pages/MarketsPage'
 import ChatBot from './components/ChatBot'
 import HomePage from './pages/HomePage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -48,6 +49,7 @@ function AppRoutes() {
         <ProtectedRoute><Navbar /><MarketsPage /></ProtectedRoute>
         } />
         <Route path="/" element={<HomePage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       {user && <ChatBot />}
     </div>

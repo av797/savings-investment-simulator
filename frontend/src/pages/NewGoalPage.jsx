@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createGoal } from '../api'
+import { createGoal, deleteGoal } from '../api'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
 import GoalIcon from '../components/GoalIcon'
+import ConfirmModal from '../components/ConfirmModal'
 
 const GOAL_TYPES = [
   { value: 'house',          label: 'House deposit' },
@@ -33,6 +34,9 @@ export default function NewGoalPage() {
   const [selectedCountry, setSelectedCountry] = useState('GB')
   const [inflationData, setInflationData]     = useState(null)
   const [inflationLoading, setInflationLoading] = useState(false)
+
+  const [pendingWarning, setPendingWarning] = useState(null)
+  const [resolvingWarning, setResolvingWarning] = useState(false)
 
   const [form, setForm] = useState({
     name:               '',
@@ -99,24 +103,46 @@ export default function NewGoalPage() {
       })
 
       if (res.data.warning) {
-        const confirmed = confirm(`⚠️ ${res.data.warning}\n\nGoal created — do you want to keep it?`)
-        if (!confirmed) {
-          await deleteGoal(res.data.id)
-          setLoading(false)
-          return
-        }
+        setPendingWarning({ id: res.data.id, warning: res.data.warning })
+        setLoading(false)
+        return
       }
 
       navigate(`/goals/${res.data.id}`)
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to create goal')
+      setLoading(false)
+    }
+  }
+
+  const handleKeepGoal = () => {
+    navigate(`/goals/${pendingWarning.id}`)
+  }
+
+  const handleDiscardGoal = async () => {
+    setResolvingWarning(true)
+    try {
+      await deleteGoal(pendingWarning.id)
     } finally {
+      setResolvingWarning(false)
+      setPendingWarning(null)
       setLoading(false)
     }
   }
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
+
+      <ConfirmModal
+        open={!!pendingWarning}
+        title="Heads up"
+        message={pendingWarning?.warning ? `${pendingWarning.warning}\n\nThe goal has been created. Keep it, or discard it and adjust the numbers?` : ''}
+        confirmLabel="Keep it"
+        cancelLabel={resolvingWarning ? 'Discarding...' : 'Discard'}
+        onConfirm={handleKeepGoal}
+        onCancel={handleDiscardGoal}
+      />
+
       <div className="mb-8">
         <button
           onClick={() => navigate('/dashboard')}
