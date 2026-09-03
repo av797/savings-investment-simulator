@@ -131,7 +131,7 @@ export default function NewGoalPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
+    <div className="max-w-2xl mx-auto px-6 pt-16 md:pt-10 pb-10">
 
       <ConfirmModal
         open={!!pendingWarning}

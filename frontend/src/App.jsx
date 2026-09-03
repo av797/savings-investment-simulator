@@ -6,7 +6,7 @@ import GoalDetailPage from './pages/GoalDetailPage'
 import NewGoalPage from './pages/NewGoalPage'
 import ReportPage from './pages/ReportPage'
 import SettingsPage from './pages/SettingsPage'
-import Navbar from './components/Navbar'
+import Sidebar from './components/Sidebar'
 import MarketsPage from './pages/MarketsPage'
 import ChatBot from './components/ChatBot'
 import HomePage from './pages/HomePage'
@@ -23,36 +23,44 @@ function ProtectedRoute({ children }) {
   return children
 }
 
+function AppShell({ children }) {
+  return (
+    <div className="min-h-screen bg-gray-950 text-gray-100 flex">
+      <Sidebar />
+      <main className="flex-1 min-w-0">
+        {children}
+      </main>
+    </div>
+  )
+}
+
 function AppRoutes() {
   const { user } = useAuth()
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
-      <Routes>
-        <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
-        <Route path="/dashboard" element={
-          <ProtectedRoute><Navbar /><DashboardPage /></ProtectedRoute>
-        } />
-        <Route path="/goals/new" element={
-          <ProtectedRoute><Navbar /><NewGoalPage /></ProtectedRoute>
-        } />
-        <Route path="/goals/:id" element={
-          <ProtectedRoute><Navbar /><GoalDetailPage /></ProtectedRoute>
-        } />
-        <Route path="/report" element={
-          <ProtectedRoute><Navbar /><ReportPage /></ProtectedRoute>
-        } />
-        <Route path="/settings" element={
-          <ProtectedRoute><Navbar /><SettingsPage /></ProtectedRoute>
-        } />
-        <Route path="/markets" element={
-        <ProtectedRoute><Navbar /><MarketsPage /></ProtectedRoute>
-        } />
-        <Route path="/" element={<HomePage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-      {user && <ChatBot />}
-    </div>
+    <Routes>
+      <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+      <Route path="/dashboard" element={
+        <ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>
+      } />
+      <Route path="/goals/new" element={
+        <ProtectedRoute><AppShell><NewGoalPage /></AppShell></ProtectedRoute>
+      } />
+      <Route path="/goals/:id" element={
+        <ProtectedRoute><AppShell><GoalDetailPage /></AppShell></ProtectedRoute>
+      } />
+      <Route path="/report" element={
+        <ProtectedRoute><AppShell><ReportPage /></AppShell></ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute><AppShell><SettingsPage /></AppShell></ProtectedRoute>
+      } />
+      <Route path="/markets" element={
+        <ProtectedRoute><AppShell><MarketsPage /></AppShell></ProtectedRoute>
+      } />
+      <Route path="/" element={<HomePage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   )
 }
 
@@ -60,8 +68,17 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <div className="min-h-screen bg-gray-950 text-gray-100">
+          <AppRoutes />
+          <ChatBotGate />
+        </div>
       </AuthProvider>
     </BrowserRouter>
   )
+}
+
+function ChatBotGate() {
+  const { user } = useAuth()
+  if (!user) return null
+  return <ChatBot />
 }
