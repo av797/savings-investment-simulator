@@ -300,7 +300,7 @@ export default function ReportPage() {
   const eligibleGoals  = data.goals.filter((g) => g.goal.splits?.length > 0)
 
   return (
-    <div className="max-w-4xl mx-auto px-6 pt-16 md:pt-10 pb-10">
+    <div className="max-w-4xl mx-auto px-6 py-10">
 
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-white">Financial plan report</h1>

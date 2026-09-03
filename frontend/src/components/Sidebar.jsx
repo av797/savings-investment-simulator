@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 
 const NAV_ITEMS = [
   {
@@ -42,21 +41,13 @@ const NAV_ITEMS = [
 ]
 
 function SidebarContent({ onNavigate }) {
-  const { user, logoutUser } = useAuth()
-  const location             = useLocation()
-  const navigate             = useNavigate()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const isActive = (path) =>
     path === '/dashboard'
       ? location.pathname === '/dashboard' || location.pathname.startsWith('/goals/')
       : location.pathname === path
-
-  const displayName = user?.email?.split('@')[0] || 'Account'
-
-  const handleLogout = () => {
-    logoutUser()
-    navigate('/auth')
-  }
 
   const handleNav = (to) => {
     if (onNavigate) onNavigate()
@@ -68,7 +59,7 @@ function SidebarContent({ onNavigate }) {
       <Link
         to="/dashboard"
         onClick={onNavigate}
-        className="flex items-center gap-2.5 px-5 h-16 border-b border-gray-800"
+        className="flex items-center gap-2.5 px-5 h-16 border-b border-gray-800 flex-shrink-0"
       >
         <div className="w-8 h-8 bg-emerald-400 rounded-lg flex items-center justify-center">
           <span className="text-gray-950 font-black text-base">G</span>
@@ -95,49 +86,6 @@ function SidebarContent({ onNavigate }) {
           )
         })}
       </nav>
-
-      <div className="border-t border-gray-800 p-3 space-y-1">
-        <Link
-          to="/settings"
-          onClick={onNavigate}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-            isActive('/settings')
-              ? 'bg-gray-800 text-white'
-              : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
-          }`}
-        >
-          <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span>Settings</span>
-        </Link>
-
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-800/40 mt-2">
-          <div className="w-9 h-9 rounded-full overflow-hidden bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center flex-shrink-0">
-            {user?.avatar ? (
-              <img src={user.avatar} alt={displayName} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-emerald-400 font-bold text-sm">
-                {displayName[0]?.toUpperCase()}
-              </span>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">{displayName}</p>
-            <p className="text-gray-500 text-xs truncate">{user?.email}</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            title="Sign out"
-            className="text-gray-500 hover:text-white transition-colors flex-shrink-0"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-            </svg>
-          </button>
-        </div>
-      </div>
     </>
   )
 }
@@ -157,7 +105,7 @@ export default function Sidebar() {
     <>
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-40 w-10 h-10 bg-gray-900 border border-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:text-white"
+        className="md:hidden fixed top-[68px] left-4 z-30 w-10 h-10 bg-gray-900 border border-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:text-white"
         aria-label="Open menu"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -165,7 +113,7 @@ export default function Sidebar() {
         </svg>
       </button>
 
-      <aside className="hidden md:flex w-64 flex-shrink-0 bg-gray-950 border-r border-gray-800 flex-col h-screen sticky top-0">
+      <aside className="hidden md:flex w-64 flex-shrink-0 bg-gray-950 border-r border-gray-800 flex-col h-[calc(100vh-3.5rem)] sticky top-14">
         <SidebarContent />
       </aside>
 

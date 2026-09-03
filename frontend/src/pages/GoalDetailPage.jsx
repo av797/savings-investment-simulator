@@ -296,7 +296,7 @@ export default function GoalDetailPage() {
   )
 
   if (error && !goal) return (
-    <div className="max-w-7xl mx-auto px-6 pt-16 md:pt-10 pb-10 text-red-400">{error}</div>
+    <div className="max-w-7xl mx-auto px-6 py-12 text-red-400">{error}</div>
   )
 
   const successColor = latestSim
@@ -306,7 +306,7 @@ export default function GoalDetailPage() {
     : 'text-gray-500'
 
   return (
-    <div className="max-w-7xl mx-auto px-6 pt-16 md:pt-10 pb-10">
+    <div className="max-w-7xl mx-auto px-6 py-10">
 
       <ConfirmModal
         open={showDeleteModal}

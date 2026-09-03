@@ -6,7 +6,9 @@ import GoalDetailPage from './pages/GoalDetailPage'
 import NewGoalPage from './pages/NewGoalPage'
 import ReportPage from './pages/ReportPage'
 import SettingsPage from './pages/SettingsPage'
+import HelpPage from './pages/HelpPage'
 import Sidebar from './components/Sidebar'
+import TopBar from './components/TopBar'
 import MarketsPage from './pages/MarketsPage'
 import ChatBot from './components/ChatBot'
 import HomePage from './pages/HomePage'
@@ -25,11 +27,14 @@ function ProtectedRoute({ children }) {
 
 function AppShell({ children }) {
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex">
-      <Sidebar />
-      <main className="flex-1 min-w-0">
-        {children}
-      </main>
+    <div className="min-h-screen bg-gray-950 text-gray-100">
+      <TopBar />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 min-w-0">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }
@@ -55,6 +60,9 @@ function AppRoutes() {
       <Route path="/settings" element={
         <ProtectedRoute><AppShell><SettingsPage /></AppShell></ProtectedRoute>
       } />
+      <Route path="/help" element={
+        <ProtectedRoute><AppShell><HelpPage /></AppShell></ProtectedRoute>
+      } />
       <Route path="/markets" element={
         <ProtectedRoute><AppShell><MarketsPage /></AppShell></ProtectedRoute>
       } />
@@ -62,6 +70,12 @@ function AppRoutes() {
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
+}
+
+function ChatBotGate() {
+  const { user } = useAuth()
+  if (!user) return null
+  return <ChatBot />
 }
 
 export default function App() {
@@ -75,10 +89,4 @@ export default function App() {
       </AuthProvider>
     </BrowserRouter>
   )
-}
-
-function ChatBotGate() {
-  const { user } = useAuth()
-  if (!user) return null
-  return <ChatBot />
 }
