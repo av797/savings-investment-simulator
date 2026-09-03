@@ -74,7 +74,10 @@ function AppRoutes() {
 
 function ChatBotGate() {
   const { user } = useAuth()
+  const location = useLocation()
   if (!user) return null
+  const AUTH_ROUTES = /^\/(dashboard|goals|report|markets|settings|help)(\/|$)/
+  if (!AUTH_ROUTES.test(location.pathname)) return null
   return <ChatBot />
 }
 
