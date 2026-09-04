@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/DashboardPage'
@@ -7,6 +7,8 @@ import NewGoalPage from './pages/NewGoalPage'
 import ReportPage from './pages/ReportPage'
 import SettingsPage from './pages/SettingsPage'
 import HelpPage from './pages/HelpPage'
+import PrivacyPage from './pages/PrivacyPage'
+import TermsPage from './pages/TermsPage'
 import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
 import MarketsPage from './pages/MarketsPage'
@@ -63,6 +65,8 @@ function AppRoutes() {
       <Route path="/help" element={
         <ProtectedRoute><AppShell><HelpPage /></AppShell></ProtectedRoute>
       } />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
       <Route path="/markets" element={
         <ProtectedRoute><AppShell><MarketsPage /></AppShell></ProtectedRoute>
       } />

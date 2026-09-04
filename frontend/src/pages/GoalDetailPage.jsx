@@ -19,7 +19,7 @@ const fmt = (n) => new Intl.NumberFormat('en-GB', {
 
 const ASSET_CLASSES = [
   { value: 'stocks', label: 'Stocks',  desc: 'S&P 500 — high risk, high return',       color: 'bg-blue-400' },
-  { value: 'etfs',   label: 'ETFs',    desc: 'FTSE All-World — diversified, moderate',  color: 'bg-purple-400' },
+  { value: 'etfs',   label: 'ETFs',    desc: 'FTSE All-World — diversified, moderate',  color: 'bg-blue-400' },
   { value: 'bonds',  label: 'Bonds',   desc: 'UK Gilts — low risk, steady return',      color: 'bg-yellow-400' },
   { value: 'cash',   label: 'Cash',    desc: 'UK savings rate — very low risk',         color: 'bg-gray-400' },
 ]

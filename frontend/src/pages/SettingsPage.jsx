@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
 import ConfirmModal from '../components/ConfirmModal'
@@ -339,6 +339,27 @@ export default function SettingsPage() {
         >
           Delete my account
         </button>
+      </div>
+
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mt-6">
+        <h2 className="font-semibold text-white mb-1">Legal</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Read our policies and terms of service.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link
+            to="/privacy"
+            className="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white font-medium rounded-xl px-4 py-2.5 text-sm transition-colors text-center"
+          >
+            Privacy policy
+          </Link>
+          <Link
+            to="/terms"
+            className="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white font-medium rounded-xl px-4 py-2.5 text-sm transition-colors text-center"
+          >
+            Terms of service
+          </Link>
+        </div>
       </div>
 
     </div>

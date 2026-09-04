@@ -135,14 +135,14 @@ export default function ChatBot() {
                 <div className="w-9 h-9 bg-emerald-400 rounded-full flex items-center justify-center">
                   <span className="text-gray-950 text-sm font-black">G</span>
                 </div>
-                <span className="absolute -bottom-1 -right-1 bg-purple-500 text-white text-[9px] font-bold px-1 rounded-full leading-4">
+                <span className="absolute -bottom-1 -right-1 bg-emerald-400 text-gray-950 text-[9px] font-bold px-1 rounded-md leading-4">
                   AI
                 </span>
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
                   <p className="text-white text-sm font-semibold">GoalIQ Assistant</p>
-                  <span className="text-[10px] font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30 px-1.5 py-0.5 rounded-full">
+                  <span className="text-[10px] font-semibold bg-emerald-400/15 text-emerald-400 border border-emerald-400/30 px-1.5 py-0.5 rounded-md">
                     AI Agent
                   </span>
                 </div>

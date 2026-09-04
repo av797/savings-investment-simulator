@@ -145,10 +145,10 @@ function OnboardingWalkthrough() {
     {
       num:    '3',
       title:  'Run a simulation',
-      desc:   'We\'ll run 10,000 scenarios using 30 years of real market data — including the crash years — so you see realistic ranges, not best-case guesses.',
+      desc:   'We\'ll run 10,000 scenarios using 30 years of real market data, including the crash years, so you see realistic ranges, not best-case guesses.',
       cta:    null,
       to:     null,
-      accent: 'purple',
+      accent: 'blue',
     },
   ]
 
@@ -169,7 +169,6 @@ function OnboardingWalkthrough() {
           const colors = {
             emerald: 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20',
             blue:    'bg-blue-400/10 text-blue-400 border-blue-400/20',
-            purple:  'bg-purple-400/10 text-purple-400 border-purple-400/20',
           }
           return (
             <div key={step.num} className="bg-gray-950/50 border border-gray-800 rounded-xl p-6">

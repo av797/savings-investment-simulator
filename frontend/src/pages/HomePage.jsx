@@ -221,7 +221,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
 
             <div data-reveal>
-              <p className="text-purple-400 text-xs font-semibold uppercase tracking-widest mb-5">Assistant</p>
+              <p className="text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-5">Assistant</p>
               <h2 className="text-2xl font-bold text-white mb-4">
                 Ask questions about your actual plan
               </h2>
@@ -301,8 +301,8 @@ export default function HomePage() {
             Past performance doesn't guarantee future results.
           </p>
           <div className="flex gap-5 text-sm text-gray-500">
-            <Link to="/auth" className="hover:text-gray-300 transition-colors">Sign in</Link>
-            <Link to="/auth" className="hover:text-gray-300 transition-colors">Register</Link>
+            <Link to="/privacy" className="hover:text-gray-300 transition-colors">Privacy</Link>
+            <Link to="/terms" className="hover:text-gray-300 transition-colors">Terms</Link>
           </div>
         </div>
       </footer>
