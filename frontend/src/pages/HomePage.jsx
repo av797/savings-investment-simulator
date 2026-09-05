@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useRef } from 'react'
+import ProductScreenshot from '../components/ProductScreenshot'
 
 const ASSET_CLASSES = [
   { name: 'S&P 500',        desc: 'US equities',        avg: '+10.7%', color: '#60a5fa' },
@@ -112,7 +113,24 @@ export default function HomePage() {
         </div>
       </nav>
 
-      <section className="max-w-6xl mx-auto px-6 pt-28 pb-24">
+      <div className="relative">
+        <div
+          className="absolute inset-x-0 top-0 h-64 md:h-80 overflow-hidden pointer-events-none -z-0"
+          aria-hidden="true"
+        >
+          <img
+            src="/hero-market.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{
+              maskImage:       'linear-gradient(to left, black 30%, transparent 95%)',
+              WebkitMaskImage: 'linear-gradient(to left, black 30%, transparent 95%)',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-gray-950" />
+        </div>
+
+        <section className="max-w-6xl mx-auto px-6 pt-16 md:pt-20 pb-24 relative z-10">
         <div className="max-w-3xl">
           <p className="text-emerald-400 text-sm font-medium mb-5 tracking-wide uppercase">
             Goal-based financial planning
@@ -141,6 +159,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </div>
+
+      <ProductScreenshot />
 
       <section className="border-y border-gray-800" ref={statsRef}>
         <div className="max-w-6xl mx-auto px-6 py-10">
